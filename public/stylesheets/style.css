@@ -1,0 +1,66 @@
+.view_port {
+
+  margin: auto;
+  width: 60%;
+  padding: 1px;
+  border: 3px solid green;
+  text-align: center;
+
+}
+
+#canvas {
+  background-color: lightgrey;
+  border-width: 3px;
+  border-color:  green;
+  /*transition: all 25.5s ease-in-out;
+   animation:spin 60s linear infinite;
+  animation: wiggle 20s linear infinite; */
+  animation: wobble 30s ease infinite;
+  opacity:0.85;
+}
+
+/* https://stackoverflow.com/questions/16771225/css3-rotate-animation */
+/* @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } } */
+@keyframes wobble { 0% { transform:rotate(45deg); } 50% { transform:rotate(-45deg); } 100% { transform:rotate(45deg); }}
+
+
+p {
+  text-align: center;
+}
+
+h1 {
+  font-family: 'Bungee Shade', cursive;font-size: 46px;
+  background: -webkit-linear-gradient(green, red);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.numbers {
+  font-family: 'Creepster', cursive;font-size: 26px;
+}
+
+.messages {
+  font-family: 'Creepster', cursive;font-size: 16px;
+  color: red;
+}
+
+span#sLength {
+  display: inline-block;
+  width: 50px;
+  background-color: aqua;
+}
+span#high {
+  display: inline-block;
+  width: 50px;
+  background-color: aqua;
+}
+
+/*
+#canvas:hover {
+    -webkit-transform : rotate(66deg);
+    -moz-transform : rotate(66deg);
+    -ms-transform : rotate(66deg);
+    -o-transform : rotate(66deg);
+    transform : rotate(365deg);
+}
+*/
