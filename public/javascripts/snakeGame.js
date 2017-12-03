@@ -42,6 +42,8 @@ window.onload = function() {
 
     var initialized = false;
 
+    var doOnce = true;
+
     // Images
     var images = [];
     var tileimage;
@@ -346,7 +348,7 @@ window.onload = function() {
     // Create objects
     var snake = new Snake();
     // var level = new Level(20, 15, 32, 32);  //original
-    var level = new Level(48, 36, 16, 16);
+    var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
 
     // Variables
     var score = 0;              //
@@ -356,7 +358,9 @@ window.onload = function() {
     var gameovertime = 1;       // How long we have been game over
     var gameoverdelay = 0.5;    // Waiting time after game over
     var maxlives = 5;        // max number of lives
-    var livesLeft = maxlives;
+    var livesLeft = maxlives;  // number of lives
+    var gameLevel = 1;         // number of levels to play, advances after completing TODO rounds
+    var sSpeed = 10;           // initial speed, bumped to 15 for level 2
 
     // Initialize the game
     function init() {
@@ -390,12 +394,24 @@ window.onload = function() {
             gameover = false;
             $('#lives').html(livesLeft);
             $('#highestscore').html(newHighScore);
+            if (gameLevel < 2) {
+                gameLevel = 2;
+                sSpeed = 15;
+            }
+            $('#gameLevel').html(gameLevel);
+
         }
     }
 
+    /*
+    function GetDivElement() {
+        return newHighScore;
+    }
+    */
+
     function newGame() {
         // Initialize the snake
-        snake.init(5, 10, 1, 10, 4);  // 5 was 10
+        snake.init(5, 10, 1, sSpeed, 4);  //  function(x, y, direction, speed, numsegments)
 
         // Generate the default level
         level.generate();
@@ -625,7 +641,19 @@ window.onload = function() {
                 context.textAlign = 'center';
                 //drawCenterText("Press g or G to start a new game", 0, canvas.height / 2 + 5, canvas.width);
                 context.fillText("GAME OVER!", canvas.width / 2, canvas.height / 2);
-                context.fillText("Press g or G to start a new game", canvas.width / 2 , canvas.height / 2 + 25);
+                context.fillText("Press g to start a new game", canvas.width / 2 , canvas.height / 2 + 25);
+
+                // a facinating look at values and functions contained within an object defined with prototypes
+                //for (item in snake) {
+                //    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
+                //}
+
+                if (doOnce) {
+                    for (item in exports) {
+                        console.log('item = ' + item + ' exports[item] = ' + exports[item]);
+                    }
+                    doOnce = false;
+                }
 
             }
 

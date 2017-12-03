@@ -12,6 +12,8 @@ var MongoDBStore = require('connect-mongodb-session')(session);
 var passportConfig = require('./config/passport')(passport);
 var MongoClient = require('mongodb').MongoClient;
 
+var ObjectID =  require('mongodb').ObjectID;
+
 var app = express();
 
 var mongo_url = process.env.MONGO_URL;

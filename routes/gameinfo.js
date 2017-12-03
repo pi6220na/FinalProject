@@ -2,8 +2,9 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 var ObjectID = require('mongodb').ObjectId;
-var Task = require('../models/user');
+
 var tasks = require('../routes/gameinfo');
+var User = require('../models/user');
 
 
 // Note in app.js, app.use(passport) creates req.user when a user is logged in.
@@ -109,6 +110,82 @@ router.post('/saveSecrets', isLoggedIn, function(req, res, next){
         return res.redirect('/secret');
     })
 });
+
+
+
+/* POST update */
+router.get('/update', function(req, res, next){
+
+
+    var _id = req.body._id;
+
+    // use form data to make a new Bird; save to DB
+    var user = User(req.body);
+
+    for (item in req.body) {
+        console.log('body item = ' + item + ' -> ' + req.body[item]);
+    }
+
+    // Have to re-arrange the form data to match our nested schema.
+    // Form data can only be key-value pairs.
+    user.highGame = {
+        highScore: req.body.highScore,
+        highDate: req.body.highDate,
+        comment: req.body.comment
+    };
+
+    User.find( {username: "new"})
+        .then( (docs) => {
+            res.render('game', {title: 'Incomplete Tasks', gameinfo: docs})
+        }).catch( (err) => {
+        next(err);
+    });
+
+    console.log('_id = ' + _id);
+
+
+    if (!ObjectID.isValid(_id)) {
+        var notFound = Error('Update error: Not found... invalid _id');
+        notFound.status = 404;
+        //next(notFound);
+
+    }
+
+    else {
+
+        console.log('id = ' + _id);
+        console.log('highScore = ' + req.body.highScore);
+        console.log('highDate = ' + req.body.highDate);
+        console.log('comment = ' + req.body.comment);
+
+        //Logic to update the item
+        User.update({ _id: ObjectID(_id) }, { $set : { highGame: user.highGame }})
+            .then((result) => {
+
+                for (item in result){
+
+                    console.log('item = ' + item + " " + result[item]);
+                }
+
+
+                if (result.ok) {
+                    res.redirect('/game');
+                } else {
+                    // The task was not found. Report 404 error.
+                    var notFound = Error('User not found for update');
+                    notFound.status = 404;
+                    next(notFound);
+                }
+            })
+            .catch((err) => {
+                next(err);
+            });
+    }
+
+});
+
+
+
 
 
 /* Middleware function. If user is logged in, call next - this calls the next

@@ -1,5 +1,13 @@
 <h1>Slithern Slinker</h1>
 
+<form method="POST" action="/update">
+    <br>High Score Comment: <input name="comment"/>
+    <br><input type="hidden" name="newHighScore" value="{{{newHighScore}}}">
+    <br><input type="hidden" name="_id" value="{{{_id}}}">
+    <br><input type="submit" value="Submit">
+</form>
+
+
 <style>
     .outer {
         margin: auto;
@@ -79,6 +87,7 @@
 
     <canvas id="viewport" width="768" height="576"></canvas>
     <p id="highscore" class="numbers">HIGH Score: <span id="highestscore" class="numbers">000</span></p>
+
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
