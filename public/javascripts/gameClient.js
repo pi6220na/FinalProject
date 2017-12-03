@@ -184,7 +184,7 @@ function draw(actor, who) {
 
 }
 
-
+// message to player
 function message(msg) {
 
   var span = document.getElementById('message');
