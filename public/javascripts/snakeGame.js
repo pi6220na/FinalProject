@@ -403,10 +403,16 @@ window.onload = function() {
             gameover = false;
             $('#lives').html(livesLeft);
             $('#highestscore').html(newHighScore);
-            if (gameLevel < 2 && sSpeed > 9) {    // advance to level 2 only if score at least 10
+            if (gameLevel < 2 && score > 9) {    // advance to level 2 only if score at least 10
                 gameLevel = 2;
                 sSpeed = 15;
+                score = 0;
+            } else {
+                gameLevel = 1;
+                sSpeed = 10;
+                score = 0;
             }
+
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
 
