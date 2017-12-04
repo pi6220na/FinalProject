@@ -1,12 +1,22 @@
 <h1>Slithern Slinker</h1>
-
+<!--
 <form method="POST" action="/update">
     <br>High Score Comment: <input name="comment"/>
     <br><input type="hidden" name="newHighScore" value="{{{newHighScore}}}">
     <br><input type="hidden" name="_id" value="{{{_id}}}">
     <br><input type="submit" value="Submit">
 </form>
+-->
 
+<!--
+<script type ="text/javascript">
+    var newHighScore = {{{newHighScore}}};
+</script>
+
+
+
+<p>newHighScore = {{newHighScore}}</p>
+-->
 
 <style>
     .outer {
@@ -83,6 +93,7 @@
     <p id="score" class="numbers">Score: <span id="scorethis" class="numbers">000</span>
         <span id="levelID" class="numbers">   Level: </span><span id="gameLevel" class="numbers">0</span>
         <span id="livesID" class="numbers">   Lives: </span><span id="lives" class="numbers"></span>
+        <span id="speedID" class="numbers">   Speed: </span><span id="speed" class="numbers"></span>
     </p>
 
     <canvas id="viewport" width="768" height="576"></canvas>
@@ -91,4 +102,6 @@
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script type="text/javascript" src="/javascripts/snakeGame.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Black Ops One|Creepster|Bungee Shade' rel='stylesheet'>
+<!--  <script type="text/javascript" src="/javascripts/snakeGame.js"></script>  -->
+<script type="text/javascript" src="./routes/snakeGame"></script>
