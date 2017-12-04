@@ -12,9 +12,9 @@ var userSchema = new Schema( {
     signupDate : { type: Date, default: Date.now()},
 
     highGame : {
-        highScore : { type: Number, default: 555 },
+        highScore : { type: Number, default: 5 },
         highDate : { type: Date, default: Date.now() },
-        comment : { type: String, default: 'testing default string in model/user.js' }
+        comment : { type: String, default: 'I be the bestest' }
     }
 });
 
