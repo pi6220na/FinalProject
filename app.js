@@ -45,14 +45,14 @@ var store = new MongoDBStore( { uri : mongo_url, collection: 'sessions'}, functi
     }
 });
 
-/*
+
 app.use(session({
     secret: 'replace with long random string',
     resave: true,
     saveUninitialized: true,
     store: store
 }));
-*/
+
 
 
 // view engine setup
@@ -68,14 +68,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-
+/*
 app.use(session({
     secret: 'replace me with long random string',
     resave: true,
     saveUninitialized: true,
     store: new MongoDBStore( { url: mongo_url })   //was mongo_url
 }));
-
+*/
 
 require('./config/passport')(passport);
 app.use(passport.initialize());
