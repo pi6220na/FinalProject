@@ -17,8 +17,8 @@ var ObjectID =  require('mongodb').ObjectID;
 var app = express();
 
 //var mongo_url = process.env.MONGO_URL;
-//var mongo_url = process.env.MONGO_URL;
-var mongo_url = "mongodb://dbUser:456def@ds129946.mlab.com:29946/snake";   //?authSource=admin
+var mongo_url = process.env.MONGO_URL;
+//var mongo_url = "mongodb://dbUser:456def@ds129946.mlab.com:29946/snake";   //?authSource=admin
 
 console.log('app.js    mongo_url = ' + mongo_url);
 
