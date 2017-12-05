@@ -28,10 +28,10 @@ var index = require('./routes/gameinfo');
 var users = require('./routes/users');
 
 // web sockets stuff enables multi-player play
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
+//var server = require('http').Server(app);
+//var io = require('socket.io')(server);
 
-var game = require('./game/game')(io);
+//var game = require('./game/game')(io);
 
 
 var store = new MongoDBStore( { uri : mongo_url, collection: 'sessions'}, function(err){
