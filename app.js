@@ -40,13 +40,14 @@ var store = new MongoDBStore( { uri : mongo_url, collection: 'sessions'}, functi
     }
 });
 
+/*
 app.use(session({
     secret: 'replace with long random string',
     resave: true,
     saveUninitialized: true,
     store: store
 }));
-
+*/
 
 
 // view engine setup
