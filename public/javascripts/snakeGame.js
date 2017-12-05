@@ -19,8 +19,17 @@
 // ------------------------------------------------------------
 
 
+
 // The function gets called when the window is fully loaded
 window.onload = function() {
+
+
+    console.log('inside snakeGame ... user._id = ' + user._id);
+    for (item in user) {
+        console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
+    }
+
+
 
 // https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
     window.addEventListener("keydown", function(e) {
@@ -443,6 +452,11 @@ window.onload = function() {
 
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
+        $('#highestscore').html(user.highScore);
+        $('#hDate').html(user.highDate);
+        $('#hComment').html(user.comment);
+
+
     }
 
     // Add an apple to the level at an empty position
@@ -641,7 +655,7 @@ window.onload = function() {
         drawSnake();
 
         // Game over
-        if (gameover) { //here
+        if (gameover) {
             //context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillRect(0, 0, canvas.width, canvas.height);
@@ -679,38 +693,26 @@ window.onload = function() {
 
     function updateDatabase (highScore) {
 
-        /*
-        for (item in exports) {
-            console.log('exports = ' + exports[item]);
-        }
-        */
-//        console.log('User = ' + User);
+        //highGame = { highScore:highScore, highDate: Date.now(), comment: "hello" }
 
-
-        //var myDB = require('userSchema');
-
-        //console.log('user = ' + exports.username);
-        //console.log('signupDate = ' + exports.signupDate);
-        /*
-        var MongoClient = require('mongodb').MongoClient;
-        var url = "mongodb://127.0.0.1:27017/mydb";
-        var users = require('../models/user');
-
-        MongoClient.connect(url, function(err, db) {
-            if (err) throw err;
-
-            var myUser = something;
-
-            var myquery = { address: /^S/ };
-            var newvalues = {$set: {name: "Minnie"} };
-            db.collection("customers").updateMany(myquery, newvalues, function(err, res) {
-                if (err) throw err;
-                console.log(res.result.nModified + " document(s) updated");
-                db.close();
-            });
+        console.log('in updateDatabase _id = ' + user._id);
+        console.log(' in updateD highScore = ' + highScore);
+        $.ajax({
+            method: "POST",
+            url: "/update",
+            data: { highScore:highScore, _id: user._id, highDate: Date.now(), comment: "hello" }
+        }).done (function(data) {
+            console.log('ajax success', data)
+        }).fail(function (xhr) {
+           console.log("ajax Post error:");
+           for (item in xhr) {
+               console.log(xhr[item]);
+           }
         });
-        */
+
+        console.log('leaving updateDatabase');
     }
+
 
     // Draw the level tiles
     function drawLevel() {

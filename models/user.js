@@ -9,13 +9,11 @@ var userSchema = new Schema( {
         password: String
     },
 
-    signupDate : { type: Date, default: Date.now()},
 
-    highGame : {
-        highScore : { type: Number, default: 5 },
-        highDate : { type: Date, default: Date.now() },
-        comment : { type: String, default: 'I be the bestest' }
-    }
+        highScore : { type: Number },
+        highDate : { type: Date },
+        comment : { type: String }
+
 });
 
 

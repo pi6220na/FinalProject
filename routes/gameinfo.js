@@ -17,7 +17,7 @@ router.get('/', isLoggedIn, function(req, res, next) {
     //res.redirect('/secret');
     //res.redirect('/index'); // not working
    // res.redirect('/secret');
-    res.render('game');
+    res.render('game', { user : JSON.stringify(req.user) });
 });
 
 
@@ -114,62 +114,40 @@ router.post('/saveSecrets', isLoggedIn, function(req, res, next){
 
 
 /* POST update */
-router.get('/update', function(req, res, next){
+router.post('/update', function(req, res, next){
 
 
     var _id = req.body._id;
 
     // use form data to make a new Bird; save to DB
-    var user = User(req.body);
+    // var user = User(req.body);
 
     for (item in req.body) {
-        console.log('body item = ' + item + ' -> ' + req.body[item]);
+        console.log('/update in gameinfo.js body first item = ' + item + ' -> ' + req.body[item]);
     }
-
-    // Have to re-arrange the form data to match our nested schema.
-    // Form data can only be key-value pairs.
-    user.highGame = {
-        highScore: req.body.highScore,
-        highDate: req.body.highDate,
-        comment: req.body.comment
-    };
-
-    User.find( {username: "new"})
-        .then( (docs) => {
-            res.render('game', {title: 'Incomplete Tasks', gameinfo: docs})
-        }).catch( (err) => {
-        next(err);
-    });
-
-    console.log('_id = ' + _id);
-
-
-    if (!ObjectID.isValid(_id)) {
-        var notFound = Error('Update error: Not found... invalid _id');
-        notFound.status = 404;
-        //next(notFound);
-
-    }
-
-    else {
 
         console.log('id = ' + _id);
         console.log('highScore = ' + req.body.highScore);
         console.log('highDate = ' + req.body.highDate);
         console.log('comment = ' + req.body.comment);
 
+        //console.log('req.body.highGame.highDate = ' + req.body.highGame.highDate);
+        //console.log('req.body.highgame.comment = ' + req.body.highGame.comment);
+
+        //myHighGame = { highscore: req.body.highScore, highDate: req.body.highDate, comment: req.body.comment }
+
         //Logic to update the item
-        User.update({ _id: ObjectID(_id) }, { $set : { highGame: user.highGame }})
+        User.update({ _id: ObjectID(_id) }, { $set : { highScore: req.body.highScore, highDate: req.body.highDate, comment: req.body.comment }})
             .then((result) => {
 
-                for (item in result){
+               // for (item in result){
 
-                    console.log('item = ' + item + " " + result[item]);
-                }
+               //     console.log('item = ' + item + " " + result[item]);
+               // }
 
 
                 if (result.ok) {
-                    res.redirect('/game');
+                    res.render('game');
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('User not found for update');
@@ -180,7 +158,6 @@ router.get('/update', function(req, res, next){
             .catch((err) => {
                 next(err);
             });
-    }
 
 });
 
