@@ -68,7 +68,7 @@ app.use(session({
     secret: 'replace me with long random string',
     resave: true,
     saveUninitialized: true,
-    store: new MongoDBStore( { url: mongo_url })
+    store: new MongoDBStore( { url: MONGO_URL })   //was mongo_url
 }));
 
 
