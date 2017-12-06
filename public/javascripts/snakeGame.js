@@ -704,6 +704,7 @@ window.onload = function() {
         }
     }
 
+    // update the database with high score, date, and comment
     function updateDatabase (dbHighScore) {
 
         console.log('in updateDatabase _id = ' + user._id);
@@ -843,6 +844,8 @@ window.onload = function() {
             }
 
             // Draw the image of the snake part
+
+            context.strokeStyle = "rgba(255, 0, 0, 0.5)";
             context.drawImage(tileimage, tx*64, ty*64, 64, 64, tilex, tiley,
                 level.tilewidth, level.tileheight);
         }
