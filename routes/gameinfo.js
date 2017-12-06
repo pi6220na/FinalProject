@@ -4,20 +4,15 @@ var passport = require('passport');
 var ObjectID = require('mongodb').ObjectId;
 
 var tasks = require('../routes/gameinfo');
-var User = require('../models/user');
+var User = require('../models/gameDB');
 
 
 // Note in app.js, app.use(passport) creates req.user when a user is logged in.
 
 router.get('/', isLoggedIn, function(req, res, next) {
     //This will probably be the home page for your application
-    //Let's redirect to the secret page, if the user is logged in.
-    //If the user is not logged in, the isLoggedIn middleware
-    //will catch that, and redirect to a login page.
-    //res.redirect('/secret');
-    //res.redirect('/index'); // not working
-   // res.redirect('/secret');
-    res.render('game', { user : JSON.stringify(req.user) });
+    // JSON code is Clara's passes req.user to index.hbs (from server to client)
+    res.render('index', { user : JSON.stringify(req.user) });
 });
 
 
@@ -66,52 +61,6 @@ router.get('/logout', function(req, res, next) {
 
 
 
-/* GET secret page. Note isLoggedIn middleware - verify if user is logged in */
-router.get('/secret', isLoggedIn, function(req, res, next) {
-    res.render('secret', { username : req.user.local.username,
-        signupDate: req.user.signupDate,
-        favorites: req.user.favorites });
-});
-
-
-router.post('/saveSecrets', isLoggedIn, function(req, res, next){
-
-    // Check if the user has provided any new data
-    if (!req.body.color && !req.body.luckyNumber) {
-        req.flash('updateMsg', 'Please enter some new data');
-        return res.redirect('/secret')
-    }
-
-    //Collect any updated data from req.body, and add to req.user
-
-    if (req.body.color) {
-        req.user.favorites.color = req.body.color;
-    }
-    if (req.body.luckyNumber) {
-        req.user.favorites.luckyNumber = req.body.luckyNumber;
-    }
-
-    //And save the modified user, to save the new data.
-    req.user.save(function(err) {
-        if (err) {
-            if (err.name == 'ValidationError') {
-                req.flash('updateMsg', 'Error updating, check your data is valid');
-            }
-            else {
-                return next(err);  // Some other DB error
-            }
-        }
-
-        else {
-            req.flash('updateMsg', 'Updated data');
-        }
-
-        //Redirect back to secret page, which will fetch and show the updated data.
-        return res.redirect('/secret');
-    })
-});
-
-
 
 /* POST update */
 router.post('/update', function(req, res, next){
@@ -147,7 +96,7 @@ router.post('/update', function(req, res, next){
 
 
                 if (result.ok) {
-                    res.render('game');
+                    res.render('index');
                 } else {
                     // The task was not found. Report 404 error.
                     var notFound = Error('User not found for update');

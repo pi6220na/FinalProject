@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-//var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -9,14 +8,10 @@ var passport = require('passport');
 var flash = require('express-flash');
 var mongoose = require('mongoose');
 var MongoDBStore = require('connect-mongodb-session')(session);
-var passportConfig = require('./config/passport')(passport);
 var MongoClient = require('mongodb').MongoClient;
-
-var ObjectID =  require('mongodb').ObjectID;
 
 var app = express();
 
-//var mongo_url = process.env.MONGO_URL;
 var mongo_url = process.env.MONGO_URL;
 //var mongo_url = "mongodb://dbUser:456def@ds129946.mlab.com:29946/snake";   //?authSource=admin
 
@@ -27,15 +22,13 @@ mongoose.connect(mongo_url, {useMongoClient: true})
     .then( () => { console.log('Connected to MongoDB');})
     .catch( (err) => { console.log('Error connecting',err);});
 
-// var www = require('./bin/www');
 
 var index = require('./routes/gameinfo');
-var users = require('./routes/users');
+
 
 // web sockets stuff enables multi-player play
 //var server = require('http').Server(app);
 //var io = require('socket.io')(server);
-
 //var game = require('./game/game')(io);
 
 
@@ -59,8 +52,6 @@ app.use(session({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -68,26 +59,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-/*
-app.use(session({
-    secret: 'replace me with long random string',
-    resave: true,
-    saveUninitialized: true,
-    store: new MongoDBStore( { url: mongo_url })   //was mongo_url
-}));
-*/
-
 require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());         // This creates an req.user variable for logged in users.
 app.use(flash());
 
-//mongoose.connect(mongo_url);
-
 app.use('/', index);
-app.use('/users', users);
-
-
 
 MongoClient.connect(mongo_url).then( (db) => {
 
@@ -127,8 +104,5 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-//module.exports = app;
 
-//module.exports = server;
-
-module.exports = { app:app, users: users };
+module.exports = { app:app };

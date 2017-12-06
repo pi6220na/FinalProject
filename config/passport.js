@@ -1,6 +1,6 @@
 var LocalStrategy = require('passport-local');
 
-var User = require('../models/user');
+var User = require('../models/gameDB');
 
 /*
 

@@ -35,11 +35,18 @@ h1 {
   -webkit-text-fill-color: transparent;
 }
 
+h2 {
+  font-family: 'Creepster', cursive;font-size: 36px;
+  background: -webkit-linear-gradient(green, red);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .numbers {
   font-family: 'Creepster', cursive;font-size: 26px;
 }
 
-.messages {
+.messages, form {
   font-family: 'Creepster', cursive;font-size: 16px;
   color: red;
 }

@@ -679,12 +679,14 @@ window.onload = function() {
                 //    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
                 //}
 
+                /*
                 if (doOnce) {
                     for (item in exports) {
                         console.log('item = ' + item + ' exports[item] = ' + exports[item]);
                     }
                     doOnce = false;
                 }
+                */
 
             }
 
@@ -696,13 +698,13 @@ window.onload = function() {
         //highGame = { highScore:highScore, highDate: Date.now(), comment: "hello" }
 
         console.log('in updateDatabase _id = ' + user._id);
-        console.log(' in updateD highScore = ' + highScore);
+        console.log(' in updateDatabase highScore = ' + highScore);
         $.ajax({
             method: "POST",
             url: "/update",
-            data: { highScore:highScore, _id: user._id, highDate: Date.now(), comment: "hello" }
+            data: { highScore:highScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
-            console.log('ajax success', data)
+            //console.log('ajax success', data)
         }).fail(function (xhr) {
            console.log("ajax Post error:");
            for (item in xhr) {

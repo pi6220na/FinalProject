@@ -1,0 +1,103 @@
+<h1>Slithern Slinker</h1>
+
+<style>
+    .outer {
+        margin: auto;
+        width: 800px;          /*  <!-- was 60%; -->  */
+        height: 730px;
+        /* padding: 30px; */
+        border: 3px solid green;
+        text-align: center;
+        background-color: lightgrey;
+        /*transition: all 25.5s ease-in-out;
+         animation:spin 60s linear infinite;
+        animation: wiggle 20s linear infinite; */
+        /* <!-- animation: wobble 30s ease infinite; --> */
+        animation: wobble 15s linear infinite;
+        opacity:0.85;
+    }
+
+    /* https://stackoverflow.com/questions/16771225/css3-rotate-animation */
+    /* @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } } */
+    /* @keyframes wobble { 0% { transform:rotate(45deg); } 50% { transform:rotate(-45deg); } 100% { transform:rotate(45deg); }}*/
+    @keyframes wobble { 0% { transform:rotate(60deg); } 50% { transform:rotate(-60deg); } 100% { transform:rotate(60deg); }}
+
+
+    p {
+        text-align: center;
+    }
+
+    h1 {
+        /* font-family: 'Bungee Shade', cursive;font-size: 46px; */
+        font-family: 'Creepster', cursive;font-size: 46px;
+        background: -webkit-linear-gradient(green, red);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+    }
+
+    .numbers {
+        font-family: 'Creepster', cursive;font-size: 26px;
+    }
+
+    .messages {
+        font-family: 'Creepster', cursive;font-size: 16px;
+        color: red;
+    }
+
+    span#sLength {
+        display: inline-block;
+        width: 50px;
+        background-color: aqua;
+    }
+    span#high {
+        display: inline-block;
+        width: 50px;
+        background-color: aqua;
+    }
+
+    /*
+    #canvas:hover {
+        -webkit-transform : rotate(66deg);
+        -moz-transform : rotate(66deg);
+        -ms-transform : rotate(66deg);
+        -o-transform : rotate(66deg);
+        transform : rotate(365deg);
+    }
+    */
+
+</style>
+
+<script>
+    // Clara's code to receive user data from the server (where the DB info resides)
+    var userJSON = '{{{user}}}';
+
+    console.log('index.hbs userJSON before converting to object = ' + userJSON);
+
+    var user = JSON.parse(userJSON);
+    for (item in user) {
+        console.log('index.hbs item = ' + item + ' user[item] = ' + user[item]);
+    }
+
+</script>
+
+
+<div class="outer">
+    <p id="score" class="numbers">Score: <span id="scorethis" class="numbers">000</span>
+        <span id="levelID" class="numbers">   Level: </span><span id="gameLevel" class="numbers">0</span>
+        <span id="livesID" class="numbers">   Lives: </span><span id="lives" class="numbers"></span>
+        <span id="speedID" class="numbers">   Speed: </span><span id="speed" class="numbers"></span>
+    </p>
+
+    <canvas id="viewport" width="768" height="576"></canvas>
+    <p id="highscore" class="numbers">HIGH Score: <span id="highestscore" class="numbers">000</span>
+        <span id="highdate" class="numbers"> Date: </span><span id="hDate" class="numbers"></span>
+        <span id="highcomment" class="numbers"> Comment: </span><span id="hComment" class="numbers"></span>
+    </p>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Black Ops One|Creepster|Bungee Shade' rel='stylesheet'>
+<script type="text/javascript" src="/javascripts/snakeGame.js"></script>
+
