@@ -363,10 +363,11 @@ window.onload = function() {
 
     // Variables
     var score = 0;              //
-    var dbHighScore;              // initialize from server   TODO
+  //  var dbHighScore;              // initialize from server   TODO
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
-    var gameover = true;        // Game is over
-    var gameovertime = 1;       // How long we have been game over
+    var gameover = false;        // Game is over
+    var roundover = false;      // when player collides with something, the round is over
+    var roundOverTime = 1;       // How long we have been game over
     var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
     var maxlives = 5;        // max number of lives
     var livesLeft = maxlives;  // number of lives
@@ -403,7 +404,7 @@ window.onload = function() {
 
         // New game
         newGame();
-        gameover = true;
+        roundover = true;
 
         // Enter main loop
         main(0);
@@ -411,11 +412,11 @@ window.onload = function() {
 
     // Check if we can start a new game
     function tryNewGame() {
-        if (gameovertime > gameoverdelay) {
+        if (roundOverTime > gameoverdelay) {
             newGame();
-            gameover = false;
+            roundover = false;
             $('#lives').html(livesLeft);
-            $('#highestscore').html(newHighScore);
+     //       $('#highestscore').html(newHighScore);
             if (gameLevel < 2 && score > 9) {    // advance to level 2 only if score at least 10
                 gameLevel = 2;
                 sSpeed = 15;
@@ -456,6 +457,7 @@ window.onload = function() {
 
         // Initialize variables
         gameover = false;
+        roundover = false;
 
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
@@ -544,7 +546,7 @@ window.onload = function() {
         if (!gameover) {
             updateGame(dt);
         } else {
-            gameovertime += dt;
+            roundOverTime += dt;
         }
     }
 
@@ -625,7 +627,7 @@ window.onload = function() {
             }
 
             if (gameover) {
-                gameovertime = 0;
+                roundOverTime = 0;
 
                 if (livesLeft > 0) {
                     livesLeft -= 1;
@@ -704,15 +706,14 @@ window.onload = function() {
         }
     }
 
-    // update the database with high score, date, and comment
-    function updateDatabase (dbHighScore) {
+    function updateDatabase (HighScore) {
 
         console.log('in updateDatabase _id = ' + user._id);
-        console.log(' in updateDatabase dbHighScore = ' + newHighScore);
+        console.log(' in updateDatabase highScore = ' + HighScore);
         $.ajax({
             method: "POST",
             url: "/update",
-            data: { highScore: newHighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
+            data: { highScore: HighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
             //console.log('ajax success', data)
             console.log('ajax success')
@@ -844,8 +845,6 @@ window.onload = function() {
             }
 
             // Draw the image of the snake part
-
-            context.strokeStyle = "rgba(255, 0, 0, 0.5)";
             context.drawImage(tileimage, tx*64, ty*64, 64, 64, tilex, tiley,
                 level.tilewidth, level.tileheight);
         }
@@ -879,9 +878,9 @@ window.onload = function() {
     // Keyboard event handler
     function onKeyDown(e) {
         if (gameover) {
-            if (e.keyCode === 32 && livesLeft > 0) {    //spacebar
+            if (e.keyCode === 32 && livesLeft > 0) {    // if spacebar places and number of lives left > 0, keep playing
                 tryNewGame();
-            } else if (e.keyCode === 71&& livesLeft <= 0) {    // "g"
+            } else if (e.keyCode === 71&& livesLeft <= 0) {  // if 'g' pressed and lives left 0 or less, start new game
                 livesLeft = maxlives;
                 tryNewGame();
             }
