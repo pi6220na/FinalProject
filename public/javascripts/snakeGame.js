@@ -365,7 +365,7 @@ window.onload = function() {
     var score = 0;              //
   //  var dbHighScore;              // initialize from server   TODO
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
-    var gameover = false;        // Game is over
+    var gameover = true;        // Game is over
     var roundover = false;      // when player collides with something, the round is over
     var roundOverTime = 1;       // How long we have been game over
     var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
@@ -396,8 +396,11 @@ window.onload = function() {
         //var wimage=loadImages(["wall_top1.png"]);
         //wallimage = wimage[0];
 
+        /*
         // Add mouse events
         canvas.addEventListener("mousedown", onMouseDown);
+        */
+
 
         // Add keyboard events
         document.addEventListener("keydown", onKeyDown);
@@ -415,6 +418,7 @@ window.onload = function() {
         if (roundOverTime > gameoverdelay) {
             newGame();
             roundover = false;
+            gameover = false;          //testing this location
             $('#lives').html(livesLeft);
      //       $('#highestscore').html(newHighScore);
             if (gameLevel < 2 && score > 9) {    // advance to level 2 only if score at least 10
@@ -456,7 +460,7 @@ window.onload = function() {
         score = 0;
 
         // Initialize variables
-        gameover = false;
+        gameover = true;
         roundover = false;
 
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
@@ -724,6 +728,8 @@ window.onload = function() {
            }
         });
 
+        $('#highestscore').html(HighScore);
+
         console.log('leaving updateDatabase');
     }
 
@@ -861,6 +867,7 @@ window.onload = function() {
         return Math.floor(low + Math.random()*(high-low+1));
     }
 
+    /*
     // Mouse event handlers
     function onMouseDown(e) {
         // Get the mouse position
@@ -874,6 +881,7 @@ window.onload = function() {
             snake.direction = (snake.direction + 1) % snake.directions.length;
         }
     }
+    */
 
     // Keyboard event handler
     function onKeyDown(e) {
@@ -914,6 +922,7 @@ window.onload = function() {
         }
     }
 
+    /*
     // Get the mouse position
     function getMousePos(canvas, e) {
         var rect = canvas.getBoundingClientRect();
@@ -922,6 +931,8 @@ window.onload = function() {
             y: Math.round((e.clientY - rect.top)/(rect.bottom - rect.top)*canvas.height)
         };
     }
+    */
+
 
     // Call init to start the game
     init();
