@@ -363,7 +363,7 @@ window.onload = function() {
 
     // Variables
     var score = 0;              //
-    var dbHighScore;              // initialize from server   TODO
+  //  var dbHighScore;              // initialize from server   TODO
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
     var gameover = false;        // Game is over
     var roundover = false;      // when player collides with something, the round is over
@@ -706,14 +706,14 @@ window.onload = function() {
         }
     }
 
-    function updateDatabase (dbHighScore) {
+    function updateDatabase (HighScore) {
 
         console.log('in updateDatabase _id = ' + user._id);
-        console.log(' in updateDatabase dbHighScore = ' + newHighScore);
+        console.log(' in updateDatabase highScore = ' + HighScore);
         $.ajax({
             method: "POST",
             url: "/update",
-            data: { highScore: newHighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
+            data: { highScore: HighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
             //console.log('ajax success', data)
             console.log('ajax success')
