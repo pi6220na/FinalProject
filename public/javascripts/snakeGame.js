@@ -360,17 +360,21 @@ window.onload = function() {
     // var level = new Level(20, 15, 32, 32);  //original
     var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
 
+
     // Variables
     var score = 0;              //
-    var highScore;              // initialize from server   TODO
-    var newHighScore = 0;       // new high score within this game, will replace highScore on server if higher
+    var dbHighScore;              // initialize from server   TODO
+    var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
     var gameover = true;        // Game is over
     var gameovertime = 1;       // How long we have been game over
-    var gameoverdelay = 0.5;    // Waiting time after game over
+    var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
     var maxlives = 5;        // max number of lives
     var livesLeft = maxlives;  // number of lives
     var gameLevel = 1;         // number of levels to play, advances after completing TODO rounds
     var sSpeed = 10;           // initial speed, bumped to 15 for level 2
+    var wallValue = 1;          // grid values in 2 dimension array used for collision detection
+    var appleValue = 2;
+    var openValue = 0;          // snake contained in snake object, collision detection done on that object
 
 
 
@@ -424,6 +428,9 @@ window.onload = function() {
 
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
+            $('#highestscore').html(user.highScore);
+            $('#hDate').html(user.highDate);
+            $('#hComment').html(user.comment);
 
         }
     }
@@ -622,10 +629,14 @@ window.onload = function() {
 
                 if (livesLeft > 0) {
                     livesLeft -= 1;
-                    console.log('woah');
+                    console.log('woah lives going down');
                 }
 
                 $('#lives').html(livesLeft);
+                if (score > newHighScore) {
+                    newHighScore = score;
+                    updateDatabase(newHighScore);
+                }
             }
         }
     }
@@ -665,7 +676,7 @@ window.onload = function() {
                 context.font = "24px Creepster";
                 context.textAlign = 'center';
                 //drawCenterText("Press spacebar to play again!", 0, canvas.height / 2, canvas.width);
-                context.fillText("Press spacebar to play again!", canvas.width / 2, canvas.height / 2);
+                context.fillText("Press spacebar for next Snake!", canvas.width / 2, canvas.height / 2);
             } else {
                 context.fillStyle = "#ff0000";
                 context.font = "24px Creepster";
@@ -693,18 +704,17 @@ window.onload = function() {
         }
     }
 
-    function updateDatabase (highScore) {
-
-        //highGame = { highScore:highScore, highDate: Date.now(), comment: "hello" }
+    function updateDatabase (dbHighScore) {
 
         console.log('in updateDatabase _id = ' + user._id);
-        console.log(' in updateDatabase highScore = ' + highScore);
+        console.log(' in updateDatabase dbHighScore = ' + newHighScore);
         $.ajax({
             method: "POST",
             url: "/update",
-            data: { highScore:highScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
+            data: { highScore: newHighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
             //console.log('ajax success', data)
+            console.log('ajax success')
         }).fail(function (xhr) {
            console.log("ajax Post error:");
            for (item in xhr) {
@@ -721,7 +731,7 @@ window.onload = function() {
         for (var i=0; i<level.columns; i++) {
             for (var j=0; j<level.rows; j++) {
                 // Get the current tile and location
-                var tile = level.tiles[i][j];
+                var tile = level.tiles[i][j];              // level.tiles is the grid everything is placed on
                 var tilex = i*level.tilewidth;
                 var tiley = j*level.tileheight;
 
