@@ -728,7 +728,11 @@ window.onload = function() {
            }
         });
 
+        // $('#highestscore').html(HighScore);
+        // post to index.hbs file the fields we just updated to the database
         $('#highestscore').html(HighScore);
+        $('#hDate').html(Date.now());
+        $('#hComment').html("update");
 
         console.log('leaving updateDatabase');
     }
