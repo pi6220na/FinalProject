@@ -642,8 +642,8 @@ window.onload = function() {
                     }
 
                     // Send player's current position to the server.
-                    sendPosition(player);
-                    //mySocket.sendPosition(snake);
+         //           sendPosition(player);
+         //           //mySocket.sendPosition(snake);
 
 
                 }
@@ -742,8 +742,8 @@ window.onload = function() {
             url: "/update",
             data: { highScore: HighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
-            console.log('ajax success', data)
-            console.log('ajax success' + data);
+            console.log('ajax success');
+            //console.log('ajax success' + data);
             //for (item in data) {
             //    console.log('snakegame item = ' + item + ' data[item] = ' + data[item]);
            // }
