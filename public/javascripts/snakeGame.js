@@ -437,7 +437,7 @@ window.onload = function() {
                 sSpeed = 10;
                 score = 0;
             }
-
+            $('#scorethis').html("000");
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
             $('#highestscore').html(user.highScore);
@@ -469,7 +469,7 @@ window.onload = function() {
         // Initialize variables
         gameover = true;
         roundover = false;
-
+        $('#scorethis').html("000");
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
         $('#highestscore').html(user.highScore);
@@ -641,9 +641,9 @@ window.onload = function() {
 
                     }
 
-                    // Send player's current position to the server.
-         //           sendPosition(player);
-         //           //mySocket.sendPosition(snake);
+                    // Sockets send player's current position to the server.
+                    sendPosition(player);
+
 
 
                 }
@@ -715,9 +715,9 @@ window.onload = function() {
                 context.fillText("Press g to start a new game", canvas.width / 2 , canvas.height / 2 + 25);
 
                 // a facinating look at values and functions contained within an object defined with prototypes
-                for (item in snake) {
-                    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
-                }
+               // for (item in snake) {
+               //    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
+               // }
 
                 /*
                 if (doOnce) {
@@ -762,9 +762,9 @@ window.onload = function() {
         $('#hDate').html(Date.now());
         $('#hComment').html("update");
         */
-        $('#highestscore').html(user.highScore);
-        $('#hDate').html(user.highDate);
-        $('#hComment').html(user.comment);
+        $('#highestscore').html(HighScore);
+        $('#hDate').html(Date.now());
+        $('#hComment').html("a comment");
 
         console.log('leaving updateDatabase');
     }

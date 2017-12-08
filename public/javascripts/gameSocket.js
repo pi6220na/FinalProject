@@ -3,12 +3,14 @@ window.onload = function() {
 
 // game.js code copied from Clara's Circles game
 
-    var socket = io();
+    //var socket = io();
 
 // socket.on('allPlayerLocations', function(opponentPositions){
 //   console.log('opponentPositions', opponentPositions)
 // });
 
+
+    // socket send to sever functions
 
     function sendPosition(player) {
         socket.emit('clientPosition', player);
@@ -25,6 +27,10 @@ window.onload = function() {
         console.log('ate opponent')
         socket.emit('playerEaten', opponent);
     }
+
+
+    // socket receive from sever functions
+
 
     socket.on('setId', function (id) {
         //player.id = id;
