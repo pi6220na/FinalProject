@@ -3,7 +3,7 @@ window.onload = function() {
 
 // game.js code copied from Clara's Circles game
 
-    //var socket = io();
+    var socket = io();
 
 // socket.on('allPlayerLocations', function(opponentPositions){
 //   console.log('opponentPositions', opponentPositions)
@@ -12,14 +12,14 @@ window.onload = function() {
 
     // socket send to sever functions
 
-    function sendPosition(player) {
-        socket.emit('clientPosition', player);
+    function sendPosition(snake) {
+        socket.emit('clientPosition', snake);
     }
 
 
     function wasEaten() {
         console.log('was eaten')
-        socket.emit('playerEaten', player);
+        socket.emit('playerEaten', snake);
     }
 
 
@@ -33,8 +33,8 @@ window.onload = function() {
 
 
     socket.on('setId', function (id) {
-        //player.id = id;
         //snake.id = id;
+        snake.id = id;
     });
 
     socket.on('allPlayerLocations', function (players) {

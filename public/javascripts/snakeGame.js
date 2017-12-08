@@ -22,13 +22,14 @@
 // import * as mySocket from '/gameSocket.js';
 
 // The function gets called when the window is fully loaded
-window.onload = function() {
+//window.onload = function() {
 
 
     console.log('inside snakeGame ... user._id = ' + user._id);
     for (item in user) {
         console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
     }
+
 
 
 
@@ -642,7 +643,53 @@ window.onload = function() {
                     }
 
                     // Sockets send player's current position to the server.
-                    sendPosition(player);
+                    sendPosition(snake);
+
+                    console.log('snakeGame: after sendPosition call, player = ' + player);
+
+                    console.log('opponents = ' + opponents[0]);
+
+                    for (var opId in opponents) {
+
+                        var op = opponents[opId];
+
+                        if (!op) {
+                            continue;  // undefined opponents - probably buggy connect code at the server
+                        }
+
+                        if (opId == player.id) {
+                            //that's us, ignore
+                            continue;
+                        }
+
+                        // If this player collides with this opponent...
+                        if (collide(op, player)) {
+                            // If the player is larger, they 'eat' the opponent
+                            if (player.radius > op.radius) {
+                                ateOpponent(op);
+                                message('You ate ' + op.id);
+                            }
+
+                            else if (player.radius == op.radius) {
+                                // equals - do nothing
+                            }
+
+                            else {
+                                // otherwise, player is smaller, gets eaten
+                                wasEaten();
+                                message('You were eaten by ' + op.id);
+                                clearInterval(interval);  //stop the setInterval method ticking, stop game
+
+                            }
+                        }
+
+                        draw(op, 'op');
+
+                    }
+
+
+
+
 
 
 
@@ -972,4 +1019,4 @@ window.onload = function() {
 
     // Call init to start the game
     init();
-};
+//};

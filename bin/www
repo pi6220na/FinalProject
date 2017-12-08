@@ -4,12 +4,9 @@
  * Module dependencies.
  */
 
-/** var app = require('../app'); */
-
 var appconfig = require('../app')
 var app = appconfig.app;
-
-var debug = require('debug')('finalproject:server');
+var debug = require('debug')('socket-game:server');
 var http = require('http');
 
 /**
@@ -22,7 +19,6 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
 
 //var server = http.createServer(app);
 var server = appconfig.server;

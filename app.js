@@ -18,7 +18,10 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+
+
 var game = require('./game/game')(io);
+
 
 var index = require('./routes/gameinfo');
 
