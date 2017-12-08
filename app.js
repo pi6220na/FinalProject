@@ -12,6 +12,19 @@ var MongoClient = require('mongodb').MongoClient;
 
 var app = express();
 
+
+// web sockets stuff enables multi-player play from Clara's Socket-cirle game
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+
+var game = require('./game/game')(io);
+
+
+
+
+var index = require('./routes/gameinfo');
+
 var mongo_url = process.env.MONGO_URL;
 //var mongo_url = "mongodb://dbUser:456def@ds129946.mlab.com:29946/snake";   //?authSource=admin
 
@@ -22,14 +35,6 @@ mongoose.connect(mongo_url, {useMongoClient: true})
     .then( () => { console.log('Connected to MongoDB');})
     .catch( (err) => { console.log('Error connecting',err);});
 
-
-var index = require('./routes/gameinfo');
-
-
-// web sockets stuff enables multi-player play
-//var server = require('http').Server(app);
-//var io = require('socket.io')(server);
-//var game = require('./game/game')(io);
 
 
 var store = new MongoDBStore( { uri : mongo_url, collection: 'sessions'}, function(err){
@@ -51,6 +56,7 @@ app.use(session({
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -105,4 +111,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-module.exports = { app:app };
+module.exports = { app:app,  server: server, };

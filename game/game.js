@@ -1,7 +1,9 @@
+// game.js code copied from Clara's Circles game
+
 
 var players = {};   // dict of id + player obj
 
-const MAX_PLAYERS = 5;
+const MAX_PLAYERS = 2;
 
 function init(io) {
 
@@ -24,6 +26,7 @@ function init(io) {
 
     socket.on('clientStart', function(player){
         // needed?
+
     });
 
 

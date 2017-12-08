@@ -18,7 +18,8 @@
 // http://rembound.com/articles/creating-a-snake-game-tutorial-with-html5
 // ------------------------------------------------------------
 
-
+// import defaultExport from "gameSocket.js";
+// import * as mySocket from '/gameSocket.js';
 
 // The function gets called when the window is fully loaded
 window.onload = function() {
@@ -62,6 +63,9 @@ window.onload = function() {
     var loadcount = 0;
     var loadtotal = 0;
     var preloaded = false;
+
+
+    var player = {id: null};
 
 
     // Load images
@@ -286,6 +290,7 @@ window.onload = function() {
 
     // Initialize the snake at a location
     Snake.prototype.init = function(x, y, direction, speed, numsegments) {
+        this.id = null;                      // sockets id
         this.x = x;
         this.y = y;
         this.direction = direction; // Up, Right, Down, Left
@@ -359,6 +364,8 @@ window.onload = function() {
     var snake = new Snake();
     // var level = new Level(20, 15, 32, 32);  //original
     var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
+
+
 
 
     // Variables
@@ -570,6 +577,9 @@ window.onload = function() {
                     gameover = true;
                 }
 
+
+                // sockets add call to server to notify players of collision
+
                 // Collisions with the snake itself
                 for (var i=0; i<snake.segments.length; i++) {
                     var sx = snake.segments[i].x;
@@ -580,6 +590,15 @@ window.onload = function() {
                         gameover = true;
                         break;
                     }
+
+
+                    // display for info purposes
+//                    for (item in snake) {
+  //                      console.log('snake item = ' + item + ' snake[item] = ' + snake[item]);
+    //                }
+
+
+
                 }
 
                 if (!gameover) {
@@ -622,6 +641,10 @@ window.onload = function() {
 
                     }
 
+                    // Send player's current position to the server.
+                    sendPosition(player);
+                    //mySocket.sendPosition(snake);
+
 
                 }
             } else {
@@ -635,7 +658,7 @@ window.onload = function() {
 
                 if (livesLeft > 0) {
                     livesLeft -= 1;
-                    console.log('woah lives going down');
+                    console.log('woah lives going down by 1');
                 }
 
                 $('#lives').html(livesLeft);
@@ -692,9 +715,9 @@ window.onload = function() {
                 context.fillText("Press g to start a new game", canvas.width / 2 , canvas.height / 2 + 25);
 
                 // a facinating look at values and functions contained within an object defined with prototypes
-                //for (item in snake) {
-                //    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
-                //}
+                for (item in snake) {
+                    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
+                }
 
                 /*
                 if (doOnce) {
@@ -719,8 +742,11 @@ window.onload = function() {
             url: "/update",
             data: { highScore: HighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
-            //console.log('ajax success', data)
-            console.log('ajax success')
+            console.log('ajax success', data)
+            console.log('ajax success' + data);
+            //for (item in data) {
+            //    console.log('snakegame item = ' + item + ' data[item] = ' + data[item]);
+           // }
         }).fail(function (xhr) {
            console.log("ajax Post error:");
            for (item in xhr) {
@@ -728,11 +754,17 @@ window.onload = function() {
            }
         });
 
+
         // $('#highestscore').html(HighScore);
         // post to index.hbs file the fields we just updated to the database
+        /*
         $('#highestscore').html(HighScore);
         $('#hDate').html(Date.now());
         $('#hComment').html("update");
+        */
+        $('#highestscore').html(user.highScore);
+        $('#hDate').html(user.highDate);
+        $('#hComment').html(user.comment);
 
         console.log('leaving updateDatabase');
     }
