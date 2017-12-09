@@ -10,6 +10,8 @@ var flash = require('express-flash');
 var mongoose = require('mongoose');
 var MongoDBStore = require('connect-mongodb-session')(session);
 var MongoClient = require('mongodb').MongoClient;
+
+
 //var index = require('./routes/index');
 //var users = require('./routes/users');
 
@@ -18,7 +20,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-
+var port = process.env.PORT || 3000;
 
 var game = require('./game/game')(io);
 
@@ -43,6 +45,9 @@ var store = new MongoDBStore( { uri : mongo_url, collection: 'sessions'}, functi
     }
 });
 
+server.listen(port, function(){
+    console.log('listening on *:' + port);
+});
 
 
 app.use(session({
@@ -72,9 +77,6 @@ app.use(flash());
 
 app.use('/', index);
 
-//app.use('/', index);
-//app.use('/users', users);
-
 MongoClient.connect(mongo_url).then( (db) => {
 
     var users = db.collection('users');
@@ -96,7 +98,6 @@ MongoClient.connect(mongo_url).then( (db) => {
 
 
 
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -107,9 +108,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-
-
 
 
 // catch 404 and forward to error handler

@@ -1,4 +1,4 @@
-window.onload = function() {
+//window.onload = function() {
 
 
 // game.js code copied from Clara's Circles game
@@ -33,17 +33,35 @@ window.onload = function() {
 
 
     socket.on('setId', function (id) {
-        //snake.id = id;
-        snake.id = id;
+
+        model.id = id;
+        console.log('*********************************   set snake.id   ********************************');
+        console.log('socket: setId = ' + id);
+        console.log('socket: model.id = ' + model.id);
+
+
     });
 
     socket.on('allPlayerLocations', function (players) {
         // console.log('rec all locations', players)
-        opponents = players;
+
+        console.log('socket: allPlayerLocations player = ' + players);
+        temp = players;
+        for (item in temp) {
+            console.log('item = ' + item + ' player = ' + temp[item]);
+        }
+
+        oppoSnake = players
+        sOpponent = players;
+
+        console.log('socket: sOpponent = ' + JSON.stringify(sOpponent));
+        console.log('socket: players = ' + JSON.stringify(players));
     })
+
 
     socket.on('atMaxPlayers', function (players) {
         message('Reached max players for multiplayer')
         preventStart()
     })
-}
+
+//}

@@ -66,7 +66,7 @@
     var preloaded = false;
 
 
-    var player = {id: null};
+//    var player = {id: null};
 
 
     // Load images
@@ -283,15 +283,15 @@
 
     // Snake
     var Snake = function() {
-        this.init(0, 0, 1, 5, 1);  // 5 was 10
+        this.init(0, 0, 0, 1, 5, 1);  // 5 was 10
     };
 
     // Direction table: Up, Right, Down, Left
     Snake.prototype.directions = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
     // Initialize the snake at a location
-    Snake.prototype.init = function(x, y, direction, speed, numsegments) {
-        this.id = null;                      // sockets id
+    Snake.prototype.init = function(id, x, y, direction, speed, numsegments) {
+        this.id = id;                      // sockets id
         this.x = x;
         this.y = y;
         this.direction = direction; // Up, Right, Down, Left
@@ -362,7 +362,10 @@
     };
 
     // Create objects
-    var snake = new Snake();
+    //var snake = new Snake();
+    var model = new Snake();
+
+    console.log('in init - ------------------------------------  model = ' + JSON.stringify(model));
     // var level = new Level(20, 15, 32, 32);  //original
     var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
 
@@ -384,7 +387,11 @@
     var wallValue = 1;          // grid values in 2 dimension array used for collision detection
     var appleValue = 2;
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
-
+    var opponent = null;         // id of opponents on other web pages
+    var playThisSnake = true;   // switch controls updating snake or opponent
+    var sOpponent =[];
+    var snake;                   // hold copy of snake
+    var model = {};
 
 
 /*
@@ -455,8 +462,8 @@
     */
 
     function newGame() {
-        // Initialize the snake
-        snake.init(5, 10, 1, sSpeed, 4);  //  function(x, y, direction, speed, numsegments)
+        // Initialize the model
+        model.init(socket.id, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
 
         // Generate the default level
         level.generate();
@@ -491,10 +498,10 @@
 
             // Make sure the snake doesn't overlap the new apple
             var overlap = false;
-            for (var i=0; i<snake.segments.length; i++) {
+            for (var i=0; i<model.segments.length; i++) {
                 // Get the position of the current snake segment
-                var sx = snake.segments[i].x;
-                var sy = snake.segments[i].y;
+                var sx = model.segments[i].x;
+                var sy = model.segments[i].y;
 
                 // Check overlap
                 if (ax === sx && ay === sy) {
@@ -563,12 +570,42 @@
     }
 
     function updateGame(dt) {
+
+
+
+        //alternate player snake with opponent snake for the following functions
+
+        console.log('opponent = ' + opponent);
+        console.log('sOpponent = ' + sOpponent);
+
+        console.log('opponent.id = ' + opponent);
+        console.log('model.id = ' + model.id);
+
+        if ((playThisSnake && sOpponent[0] !== null) &&
+            (playThisSnake && sOpponent[1] !== null)){
+            model = snake;
+            playThisSnake = false;
+            console.log('setting model to snake ***************************************************')
+        } else if ((!playThisSnake && sOpponent[0] !== null) &&
+                   (!playThisSnake && sOpponent[0] !== null)){
+            snake = model;
+            model = oppoSnake;
+            playthisSnake = true;
+            console.log('setting model to opponent *************************************************')
+        } else {
+            model = snake;
+            console.log('fell through setting model to snake')
+        }
+
+        console.log('in update loop ... model.id = ' + model.id);
+
+
         // Move the snake
-        if (snake.tryMove(dt)) {
+        if (model.tryMove(dt)) {
             // Check snake collisions
 
             // Get the coordinates of the next move
-            var nextmove = snake.nextMove();
+            var nextmove = model.nextMove();
             var nx = nextmove.x;
             var ny = nextmove.y;
 
@@ -576,28 +613,29 @@
                 if (level.tiles[nx][ny] === 1) {
                     // Collision with a wall
                     gameover = true;
-                }
+                    snakeCollideWall(model.id);
 
+                }
 
                 // sockets add call to server to notify players of collision
 
                 // Collisions with the snake itself
-                for (var i=0; i<snake.segments.length; i++) {
-                    var sx = snake.segments[i].x;
-                    var sy = snake.segments[i].y;
+                for (var i=0; i<model.segments.length; i++) {
+                    var sx = model.segments[i].x;
+                    var sy = model.segments[i].y;
 
                     if (nx === sx && ny === sy) {
                         // Found a snake part
                         gameover = true;
+                        snakeCollideSelf(model.id);
                         break;
                     }
 
 
                     // display for info purposes
 //                    for (item in snake) {
-  //                      console.log('snake item = ' + item + ' snake[item] = ' + snake[item]);
+  //                      console.log('model item = ' + item + ' model[item] = ' + model[item]);
     //                }
-
 
 
                 }
@@ -606,7 +644,7 @@
                     // The snake is allowed to move
 
                     // Move the snake
-                    snake.move();
+                    model.move();
 
                     // Check collision with an apple
                     if (level.tiles[nx][ny] === 2) {
@@ -615,9 +653,10 @@
 
                         // Add a new apple
                         addApple();
+                        snakeEatApple(model.id);
 
                         // Grow the snake
-                        snake.grow();
+                        model.grow();
 
                         // Add a point to the score
                         score++;
@@ -643,53 +682,10 @@
                     }
 
                     // Sockets send player's current position to the server.
-                    sendPosition(snake);
-
-                    console.log('snakeGame: after sendPosition call, player = ' + player);
-
-                    console.log('opponents = ' + opponents[0]);
-
-                    for (var opId in opponents) {
-
-                        var op = opponents[opId];
-
-                        if (!op) {
-                            continue;  // undefined opponents - probably buggy connect code at the server
-                        }
-
-                        if (opId == player.id) {
-                            //that's us, ignore
-                            continue;
-                        }
-
-                        // If this player collides with this opponent...
-                        if (collide(op, player)) {
-                            // If the player is larger, they 'eat' the opponent
-                            if (player.radius > op.radius) {
-                                ateOpponent(op);
-                                message('You ate ' + op.id);
-                            }
-
-                            else if (player.radius == op.radius) {
-                                // equals - do nothing
-                            }
-
-                            else {
-                                // otherwise, player is smaller, gets eaten
-                                wasEaten();
-                                message('You were eaten by ' + op.id);
-                                clearInterval(interval);  //stop the setInterval method ticking, stop game
-
-                            }
-                        }
-
-                        draw(op, 'op');
-
-                    }
+                    sendPosition(model);
 
 
-
-
+                    console.log('snakeGame: after sendPosition call, model.id = ' + model.id);
 
 
 
@@ -715,6 +711,22 @@
                 }
             }
         }
+    }
+
+    // send messages to server
+    function snakeCollideWall(id) {
+        console.log('snake collided with wall');
+        socket.emit('snakeCollideWall', id);
+    }
+
+    function snakeCollideSelf(id) {
+        console.log('snake collided with self');
+        socket.emit('snakeCollideSelf', id);
+    }
+
+    function snakeEatApple(id) {
+        console.log('snake ate apple');
+        socket.emit('snakeAteApple', id);
     }
 
     function updateFps(dt) {
@@ -865,8 +877,8 @@
     // Draw the snake
     function drawSnake() {
         // Loop over every snake segment
-        for (var i=0; i<snake.segments.length; i++) {
-            var segment = snake.segments[i];
+        for (var i=0; i<model.segments.length; i++) {
+            var segment = model.segments[i];
             var segx = segment.x;
             var segy = segment.y;
             var tilex = segx*level.tilewidth;
@@ -878,7 +890,7 @@
 
             if (i === 0) {
                 // Head; Determine the correct image
-                nseg = snake.segments[i+1]; // Next segment
+                nseg = model.segments[i+1]; // Next segment
                 if (segy < nseg.y) {
                     // Up
                     tx = 3; ty = 0;
@@ -892,9 +904,9 @@
                     // Left
                     tx = 3; ty = 1;
                 }
-            } else if (i === snake.segments.length-1) {
+            } else if (i === model.segments.length-1) {
                 // Tail; Determine the correct image
-                pseg = snake.segments[i-1]; // Prev segment
+                pseg = model.segments[i-1]; // Prev segment
                 if (pseg.y < segy) {
                     // Up
                     tx = 3; ty = 2;
@@ -910,8 +922,8 @@
                 }
             } else {
                 // Body; Determine the correct image
-                var pseg = snake.segments[i-1]; // Previous segment
-                var nseg = snake.segments[i+1]; // Next segment
+                var pseg = model.segments[i-1]; // Previous segment
+                var nseg = model.segments[i+1]; // Next segment
                 if (pseg.x < segx && nseg.x > segx || nseg.x < segx && pseg.x > segx) {
                     // Horizontal Left-Right
                     tx = 1; ty = 0;
@@ -978,29 +990,29 @@
         } else {
             if (e.keyCode === 37 || e.keyCode === 65) {
                 // Left or A
-                if (snake.direction !== 1)  {
-                    snake.direction = 3;
+                if (model.direction !== 1)  {
+                    model.direction = 3;
                 }
             } else if (e.keyCode === 38 || e.keyCode === 87) {
                 // Up or W
-                if (snake.direction !== 2)  {
-                    snake.direction = 0;
+                if (model.direction !== 2)  {
+                    model.direction = 0;
                 }
             } else if (e.keyCode === 39 || e.keyCode === 68) {
                 // Right or D
-                if (snake.direction !== 3)  {
-                    snake.direction = 1;
+                if (model.direction !== 3)  {
+                    model.direction = 1;
                 }
             } else if (e.keyCode === 40 || e.keyCode === 83) {
                 // Down or S
-                if (snake.direction !== 0)  {
-                    snake.direction = 2;
+                if (model.direction !== 0)  {
+                    model.direction = 2;
                 }
             }
 
             // Grow for demonstration purposes
             if (e.keyCode === 32) {
-                snake.grow();
+                model.grow();
             }
         }
     }
