@@ -193,7 +193,7 @@
         // upper left horizontal
         var wall5StartX = 12;
         var wall5StartY = 5;
-        var wall5FinishX = 22;
+        var wall5FinishX = 20;
         var wall5FinishY = 5;
         for (i=0; i<this.columns; i++) {
             for (j=0; j<this.rows; j++) {
@@ -205,7 +205,7 @@
             }
         }
         // upper right horizontal
-        var wall6StartX = 26;
+        var wall6StartX = 28;
         var wall6StartY = 5;
         var wall6FinishX = 36;
         var wall6FinishY = 5;
@@ -251,7 +251,7 @@
         // lower left horizontal
         var wall9StartX = 12;
         var wall9StartY = 31;
-        var wall9FinishX = 22;
+        var wall9FinishX = 20;      // 22
         var wall9FinishY = 31;
         for (i=0; i<this.columns; i++) {
             for (j=0; j<this.rows; j++) {
@@ -263,7 +263,7 @@
             }
         }
         // lower right horizontal
-        var wall10StartX = 26;
+        var wall10StartX = 28;     // 26
         var wall10StartY = 31;
         var wall10FinishX = 35;
         var wall10FinishY = 31;
@@ -364,6 +364,7 @@
     // Create objects
     //var snake = new Snake();
     var model = new Snake();
+    var snake = model;
 
     console.log('in init - ------------------------------------  model = ' + JSON.stringify(model));
     // var level = new Level(20, 15, 32, 32);  //original
@@ -388,10 +389,10 @@
     var appleValue = 2;
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
     var opponent = null;         // id of opponents on other web pages
-    var playThisSnake = true;   // switch controls updating snake or opponent
+    var playThisSnake = false;   // switch controls updating snake or opponent
     var sOpponent =[];
-    var snake;                   // hold copy of snake
-    var model = {};
+    //var oppoSnake = {};                   // hold copy of snake
+
 
 
 /*
@@ -463,7 +464,9 @@
 
     function newGame() {
         // Initialize the model
-        model.init(socket.id, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        var saveId = model.id;
+        model.init(0, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        model.id = saveId;
 
         // Generate the default level
         level.generate();
@@ -577,25 +580,33 @@
 
         console.log('opponent = ' + opponent);
         console.log('sOpponent = ' + sOpponent);
-
-        console.log('opponent.id = ' + opponent);
         console.log('model.id = ' + model.id);
 
-        if ((playThisSnake && sOpponent[0] !== null) &&
-            (playThisSnake && sOpponent[1] !== null)){
-            model = snake;
-            playThisSnake = false;
-            console.log('setting model to snake ***************************************************')
-        } else if ((!playThisSnake && sOpponent[0] !== null) &&
-                   (!playThisSnake && sOpponent[0] !== null)){
-            snake = model;
+        /*
+        if ((sOpponent !== '' || sOpponent !== null) && (model.id === '' || model.id === null)) {
+            model.id = sOpponent[1];
+        }
+        */
+
+        /*
+        if (!playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
+            playThisSnake = true;
             model = oppoSnake;
-            playthisSnake = true;
-            console.log('setting model to opponent *************************************************')
+            console.log('setting model to opponent snake *************************************************')
+        } else
+            if (playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
+            model = snake;            // snake and model are sourced from the same thing
+            playThisSnake = false;
+            console.log('fell through setting model to snake *********************************************')
         } else {
             model = snake;
-            console.log('fell through setting model to snake')
         }
+        */
+
+        console.log('snake = ' + JSON.stringify(snake));
+        console.log('oppoSnake = ' + JSON.stringify(oppoSnake));
+        console.log('model = ' + JSON.stringify(model));
+
 
         console.log('in update loop ... model.id = ' + model.id);
 
@@ -1028,7 +1039,7 @@
     }
     */
 
-
     // Call init to start the game
     init();
+
 //};

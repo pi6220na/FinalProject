@@ -12,8 +12,8 @@
 
     // socket send to sever functions
 
-    function sendPosition(snake) {
-        socket.emit('clientPosition', snake);
+    function sendPosition(model) {
+        socket.emit('currentPosition', model);
     }
 
 
@@ -32,13 +32,12 @@
     // socket receive from sever functions
 
 
-    socket.on('setId', function (id) {
+    socket.on('setId', function(id) {
 
+        console.log('*********************************   set model.id   ********************************');
         model.id = id;
-        console.log('*********************************   set snake.id   ********************************');
         console.log('socket: setId = ' + id);
         console.log('socket: model.id = ' + model.id);
-
 
     });
 
@@ -51,10 +50,10 @@
             console.log('item = ' + item + ' player = ' + temp[item]);
         }
 
-        oppoSnake = players
+        oppoSnake = players;
         sOpponent = players;
 
-        console.log('socket: sOpponent = ' + JSON.stringify(sOpponent));
+        console.log('socket: oppoSnake = ' + JSON.stringify(oppoSnake));
         console.log('socket: players = ' + JSON.stringify(players));
     })
 
