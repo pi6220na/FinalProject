@@ -1,3 +1,22 @@
+//#############################################################
+// See below for game founcdation code credit. Many thanks to
+// them. The code base has been significantly modified and
+// enhanced with new features. The original version can be
+// seen at the link below.
+//
+// A simple "snake" game played on a HTML5 canvas, using HTML,
+// CSS, and Javascript. Running on Node with Express, uses
+// Mongo Database to save user and game information.
+//
+// See: https://github.com/pi6220na/FinalProject for code repo
+//
+// See live version on Heroku at:
+// https://rocky-bayou-42087.herokuapp.com/
+//
+// Jeremy Wolfe, MCTC Web Client Server Dev Final Project
+// 12/10/2017
+//#############################################################
+
 // ------------------------------------------------------------
 // Creating A Snake Game Tutorial With HTML5
 // Copyright (c) 2015 Rembound.com
@@ -18,19 +37,13 @@
 // http://rembound.com/articles/creating-a-snake-game-tutorial-with-html5
 // ------------------------------------------------------------
 
-// import defaultExport from "gameSocket.js";
-// import * as mySocket from '/gameSocket.js';
-
-// The function gets called when the window is fully loaded
+// The function gets called when the window is fully loaded. Commented out to work with sockets.
 //window.onload = function() {
-
 
     console.log('inside snakeGame ... user._id = ' + user._id);
     for (item in user) {
         console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
     }
-
-
 
 
 // https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
@@ -52,8 +65,6 @@
     var fps = 0;
 
     var initialized = false;
-
-    var doOnce = true;
 
     // Images
     var images = [];
@@ -281,7 +292,7 @@
     };
 
 
-    // Snake
+    // Snake prototype definitions
     var Snake = function() {
         this.init(0, 0, 0, 1, 5, 1);  // 5 was 10
     };
@@ -371,13 +382,11 @@
     var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
 
 
-
-
     // Variables
     var score = 0;              //
   //  var dbHighScore;              // initialize from server   TODO
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
-    var gameover = true;        // Game is over
+    var gameover = true;        // Game is over === set to true to stop snake from moving when initialized
     var roundover = false;      // when player collides with something, the round is over
     var roundOverTime = 1;       // How long we have been game over
     var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
@@ -394,13 +403,6 @@
     //var oppoSnake = {};                   // hold copy of snake
 
 
-
-/*
-    res.locals.newHighScore = JSON.stringify(newHighScore);
-    res.render('game');
-    module.exports = init;
-*/
-
     // Initialize the game
     function init() {
         // Load images
@@ -409,9 +411,6 @@
         //for (item in tileimage) {
         //    console.log('tileimage = ' + tileimage[item]);
         //}
-        //var wimage=loadImages(["wall_top1.png"]);
-        //wallimage = wimage[0];
-
         /*
         // Add mouse events
         canvas.addEventListener("mousedown", onMouseDown);
@@ -423,7 +422,7 @@
 
         // New game
         newGame();
-        roundover = true;
+        roundover = false;
 
         // Enter main loop
         main(0);
@@ -432,20 +431,22 @@
     // Check if we can start a new game
     function tryNewGame() {
         if (roundOverTime > gameoverdelay) {
-            newGame();
-            roundover = false;
-            gameover = false;          //testing this location
             $('#lives').html(livesLeft);
      //       $('#highestscore').html(newHighScore);
-            if (gameLevel < 2 && score > 9) {    // advance to level 2 only if score at least 10
+            if (gameLevel < 2 && newHighScore > 3 && roundover) { // advance to level 2 only if highest this round score at least 10
                 gameLevel = 2;
                 sSpeed = 15;
                 score = 0;
             } else {
-                gameLevel = 1;
-                sSpeed = 10;
+                //gameLevel = 1;
+                //sSpeed = 10;
                 score = 0;
             }
+
+            newGame();
+            roundover = false;
+            gameover = false;          //testing this location
+
             $('#scorethis').html("000");
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
@@ -456,11 +457,7 @@
         }
     }
 
-    /*
-    function GetDivElement() {
-        return newHighScore;
-    }
-    */
+
 
     function newGame() {
         // Initialize the model
@@ -478,7 +475,7 @@
         score = 0;
 
         // Initialize variables
-        gameover = true;
+        gameover = false;
         roundover = false;
         $('#scorethis').html("000");
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
@@ -574,9 +571,7 @@
 
     function updateGame(dt) {
 
-
-
-        //alternate player snake with opponent snake for the following functions
+    //alternate player snake with opponent snake for the following functions
 
         console.log('opponent = ' + opponent);
         console.log('sOpponent = ' + sOpponent);
@@ -607,9 +602,7 @@
         console.log('oppoSnake = ' + JSON.stringify(oppoSnake));
         console.log('model = ' + JSON.stringify(model));
 
-
         console.log('in update loop ... model.id = ' + model.id);
-
 
         // Move the snake
         if (model.tryMove(dt)) {
@@ -641,14 +634,6 @@
                         snakeCollideSelf(model.id);
                         break;
                     }
-
-
-                    // display for info purposes
-//                    for (item in snake) {
-  //                      console.log('model item = ' + item + ' model[item] = ' + model[item]);
-    //                }
-
-
                 }
 
                 if (!gameover) {
@@ -695,10 +680,7 @@
                     // Sockets send player's current position to the server.
                     sendPosition(model);
 
-
                     console.log('snakeGame: after sendPosition call, model.id = ' + model.id);
-
-
 
                 }
             } else {
@@ -740,8 +722,9 @@
         socket.emit('snakeAteApple', id);
     }
 
+    // slows down speed of snake? Both fpstime and framecount are not used... ? must be for future release original code ?
     function updateFps(dt) {
-        if (fpstime > 0.25) {
+        if (fpstime > 1.75) {   // was 0.25
             // Calculate fps
             fps = Math.round(framecount / fpstime);
 
@@ -784,19 +767,13 @@
                 context.fillText("GAME OVER!", canvas.width / 2, canvas.height / 2);
                 context.fillText("Press g to start a new game", canvas.width / 2 , canvas.height / 2 + 25);
 
+                roundover = true;
+
                 // a facinating look at values and functions contained within an object defined with prototypes
                // for (item in snake) {
                //    console.log('item = ' + item + ' snake[item] = ' + snake[item]);
                // }
 
-                /*
-                if (doOnce) {
-                    for (item in exports) {
-                        console.log('item = ' + item + ' exports[item] = ' + exports[item]);
-                    }
-                    doOnce = false;
-                }
-                */
 
             }
 
@@ -991,6 +968,7 @@
 
     // Keyboard event handler
     function onKeyDown(e) {
+        //if (gameover || roundover) {
         if (gameover) {
             if (e.keyCode === 32 && livesLeft > 0) {    // if spacebar places and number of lives left > 0, keep playing
                 tryNewGame();
