@@ -422,7 +422,7 @@
 
         // New game
         newGame();
-        roundover = false;
+        roundover = true;
 
         // Enter main loop
         main(0);
@@ -475,7 +475,7 @@
         score = 0;
 
         // Initialize variables
-        gameover = false;
+        gameover = true;
         roundover = false;
         $('#scorethis').html("000");
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
@@ -968,8 +968,7 @@
 
     // Keyboard event handler
     function onKeyDown(e) {
-        //if (gameover || roundover) {
-        if (gameover) {
+        if (gameover || roundover) {
             if (e.keyCode === 32 && livesLeft > 0) {    // if spacebar places and number of lives left > 0, keep playing
                 tryNewGame();
             } else if (e.keyCode === 71&& livesLeft <= 0) {  // if 'g' pressed and lives left 0 or less, start new game
