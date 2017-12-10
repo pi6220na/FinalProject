@@ -364,7 +364,7 @@
     // Create objects
     //var snake = new Snake();
     var model = new Snake();
-    var snake = model;
+    var snake = model;               // make a copy to switch back and forth between model and opponent
 
     console.log('in init - ------------------------------------  model = ' + JSON.stringify(model));
     // var level = new Level(20, 15, 32, 32);  //original
@@ -390,7 +390,7 @@
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
     var opponent = null;         // id of opponents on other web pages
     var playThisSnake = false;   // switch controls updating snake or opponent
-    var sOpponent =[];
+    var sOpponent = {};
     //var oppoSnake = {};                   // hold copy of snake
 
 

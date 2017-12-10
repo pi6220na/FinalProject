@@ -82,6 +82,11 @@ function init(io) {
             io.sockets.on('currentPosition', function(model){
             // find player in players obj and update
             // receive snake object and pass to other player
+
+                console.log(' ');
+                console.log('game.js: setting oppoSnake = ' + model);
+                console.log(' ');
+
                 oppoSnake = model;                            // set opponent snake object
 
 
