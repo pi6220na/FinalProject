@@ -400,7 +400,8 @@
     var opponent = null;         // id of opponents on other web pages
     var playThisSnake = false;   // switch controls updating snake or opponent
     var sOpponent = {};
-    //var oppoSnake = {};                   // hold copy of snake
+    var oppoSnake = {};                   // hold copy of snake
+
 
 
     // Initialize the game
@@ -433,7 +434,7 @@
         if (roundOverTime > gameoverdelay) {
             $('#lives').html(livesLeft);
      //       $('#highestscore').html(newHighScore);
-            if (gameLevel < 2 && newHighScore > 3 && roundover) { // advance to level 2 only if highest this round score at least 10
+            if (gameLevel < 2 && newHighScore > 9 && roundover) { // advance to level 2 only if highest this round score at least 10
                 gameLevel = 2;
                 sSpeed = 15;
                 score = 0;
@@ -571,11 +572,16 @@
 
     function updateGame(dt) {
 
+
+        console.log('((((((((( ________________________ ))))))))))))))))');
+        console.log('         sendPosition model = ' + JSON.stringify(model));
+        console.log('((((((((( ________________________ ))))))))))))))))');
+
     //alternate player snake with opponent snake for the following functions
 
-        console.log('opponent = ' + opponent);
-        console.log('sOpponent = ' + sOpponent);
-        console.log('model.id = ' + model.id);
+        console.log('opponent = ' + JSON.stringify(opponent));
+        console.log('sOpponent = ' + JSON.stringify(sOpponent));
+        console.log('model.id = ' + JSON.stringify(model.id));
 
         /*
         if ((sOpponent !== '' || sOpponent !== null) && (model.id === '' || model.id === null)) {
@@ -583,29 +589,37 @@
         }
         */
 
-        /*
+
         if (!playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
             playThisSnake = true;
-            model = oppoSnake;
+            //model = oppoSnake;
+            Object.assign(model,oppoSnake);
             console.log('setting model to opponent snake *************************************************')
         } else
             if (playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
-            model = snake;            // snake and model are sourced from the same thing
+            //model = snake;            // snake and model are sourced from the same thing
+            Object.assign(model,snake);
             playThisSnake = false;
             console.log('fell through setting model to snake *********************************************')
-        } else {
-            model = snake;
+        } else { // single player
+            Object.assign(model,snake);
+            //model = snake;
+            console.log('single player setting model to snake *********************************************')
         }
-        */
+
 
         console.log('snake = ' + JSON.stringify(snake));
+        console.log('');
         console.log('oppoSnake = ' + JSON.stringify(oppoSnake));
+        console.log('');
         console.log('model = ' + JSON.stringify(model));
+        console.log('');
 
         console.log('in update loop ... model.id = ' + model.id);
 
         // Move the snake
         if (model.tryMove(dt)) {
+
             // Check snake collisions
 
             // Get the coordinates of the next move
@@ -613,8 +627,8 @@
             var nx = nextmove.x;
             var ny = nextmove.y;
 
-            if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {
-                if (level.tiles[nx][ny] === 1) {
+            if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {  // outer walls
+                if (level.tiles[nx][ny] === wallValue) {
                     // Collision with a wall
                     gameover = true;
                     snakeCollideWall(model.id);
@@ -631,7 +645,7 @@
                     if (nx === sx && ny === sy) {
                         // Found a snake part
                         gameover = true;
-                        snakeCollideSelf(model.id);
+                        snakeCollideSelf(model.id);  // sockets call
                         break;
                     }
                 }
@@ -643,13 +657,13 @@
                     model.move();
 
                     // Check collision with an apple
-                    if (level.tiles[nx][ny] === 2) {
+                    if (level.tiles[nx][ny] === appleValue) {
                         // Remove the apple
                         level.tiles[nx][ny] = 0;
 
                         // Add a new apple
                         addApple();
-                        snakeEatApple(model.id);
+                        snakeEatApple(model.id);          // sockets call
 
                         // Grow the snake
                         model.grow();
@@ -677,15 +691,19 @@
 
                     }
 
-                    // Sockets send player's current position to the server.
+                    // Sockets send player's new position to the server.
                     sendPosition(model);
 
-                    console.log('snakeGame: after sendPosition call, model.id = ' + model.id);
+
+                    //console.log('snakeGame: after sendPosition call, model.id = ' + model.id);
 
                 }
             } else {
                 // Out of bounds
                 gameover = true;
+
+                // send sockets message?
+
 
             }
 
@@ -827,12 +845,12 @@
                 var tiley = j*level.tileheight;
 
                 // Draw tiles based on their type
-                if (tile === 0) {
+                if (tile === openValue) {
                     // Empty space
                     //context.fillStyle = "#f7e697";
                     context.fillStyle = "#000000";
                     context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
-                } else if (tile === 1) {
+                } else if (tile === wallValue) {
                     // Wall
                     //context.fillStyle = "#bcae76";
                     context.fillStyle = "#000000";
@@ -843,7 +861,7 @@
                     var tileh = 64;
                     //context.drawImage(wallimage, tx*tilew, ty*tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
                     context.drawImage(tileimage,tx*tilew, ty*tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
-                } else if (tile === 2) {
+                } else if (tile === appleValue) {
                     // Apple
 
                     // Draw apple background
@@ -876,7 +894,7 @@
             var tx = 0;
             var ty = 0;
 
-            if (i === 0) {
+            if (i === openValue) {
                 // Head; Determine the correct image
                 nseg = model.segments[i+1]; // Next segment
                 if (segy < nseg.y) {

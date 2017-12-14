@@ -1,188 +1,146 @@
 // game.js code copied from Clara's Circles game
 
 
-//var players = {};   // dict of id + player obj
-var players = [];   // change to array dict of id + player obj
+var players = {};   // dict of id + player obj
+//var players = [];   // change to array dict of id + player obj
 
-var p1 = '';
-var p2 = '';
-var p1_set = false;
-var p2_set = false;
-var sock;
+var countPlayers = 0;
+var firstTime = true;
 
 const MAX_PLAYERS = 2;
 
-io = require( 'socket.io' )( { pingInterval: 60000 } );
+io = require( 'socket.io' );  //( { pingInterval: 60000 } );  // was 60000
+
+var holdId = "";
 
 function init(io) {
 
-    io.sockets.on('connect', function(socket){
+
+    io.on('connect', function(socket){
 
         console.log('someone connected', socket.id);
 
+        holdId = socket.id;  // this is the id of the "owner" or client connecting to sockets
 
-        socket.emit('allPlayerLocations', players);  // send to everyone.    // was .emit
+        players[socket.id] = socket.id;
+        // socket.emit('allPlayerLocations', players);  // send to everyone.    //
+        io.emit('allPlayerLocationsID', players);  // send to everyone.    //
 
-            console.log('game.js:  players.length = ' + players.length);
+        countPlayers = 0;
+        for (item in players) {
+            console.log('at top, someone connected, item = ' + item);
+            countPlayers++;
+        }
 
-            if (players.length <= MAX_PLAYERS) {
+        console.log('game.js:  countPlayers = ' + countPlayers);
 
-                socket.emit('setId', socket.id);   // send only to the thing that connected    // was .emit
+        if (countPlayers <= MAX_PLAYERS) {
 
-                /*
+            socket.emit('setId', socket.id);   // send only to the thing that connected    // was .emit
 
-                if (p1 === '') {
-                    p1 = socket.id;
-                    p1_set = false;
-                }
-                if (p2 === '' && socket.id !== p1) {
-                    p2 = socket.id;
-                    p2_set = false;
-                }
-
-                console.log('p1 = ' + p1 + ' p2 = ' + p2);
-
-                players[0] = p1;
-                players[1] = p2;
-                console.log('*******************    on someone connected = ' + players);
-
-                if (!p1_set && socket.id !== p2) {
-                    sock = p1;
-                    console.log('p1*********** set snake id *************')
-                    console.log('p1 = ' + p1);
-                    p1_set = true;
-                    socket.emit('setId', sock);   // send only to the thing that connected    // was .emit
-
-                }
-                if (!p2_set && socket.id !== p1) {
-                    sock = p2;
-                    console.log('p2*********** set snake id *************')
-                    console.log('p2 = ' + p2);
-                    p2_set = true;
-                    socket.emit('setId', sock);   // send only to the thing that connected    // was .emit
-
-                }
-
-                //     players[socket.id] = null; // placeholder until the player updates with their full info
-
-                */
+        } else {
+            socket.emit('atMaxPlayers');
+        }
 
 
-            } else {
-                socket.emit('atMaxPlayers');
-            }
+        socket.on('clientStart', function(player){
+        // needed?
+
+        });
 
 
-            io.sockets.on('clientStart', function(player){
-            // needed?
+        socket.on('currentPosition', function(model){
+        // find player in players obj and update
+        // receive snake object and pass to other player
 
-            });
+            console.log(' ');
+            console.log('game.js: setting oppoSnake model = ' + JSON.stringify(model));
+            console.log(' ');
 
-
-            io.sockets.on('currentPosition', function(model){
-            // find player in players obj and update
-            // receive snake object and pass to other player
-
-                console.log(' ');
-                console.log('game.js: setting oppoSnake = ' + model);
-                console.log(' ');
-
-                oppoSnake = model;                            // set opponent snake object
+            oppoSnake = model;                            // set opponent snake object
+            console.log(' ');
+            console.log('game.js: setting oppoSnake opposnake = ' + JSON.stringify(oppoSnake));
+            console.log(' ');
 
 
-                socket.emit('allPlayerLocations', model);
-/*
-                console.log('game.js:  player = ' + JSON.stringify(model));
-                console.log('game.js:  players = ' + model);
+            socket.broadcast.emit('allPlayerLocations', model);  //send out to other player
+            //socket.emit('allPlayerLocations', model);          // send to sender-client only
+            //io.emit('allPlayerLocations', model);           // send to all players
 
-                pi = ''; p2 = '';
-
-                if (p1 === '') {
-                    p1 = socket.id;
-                    p1_set = false;
-                }
-                if (p2 === '' && socket.id !== p1) {
-                    p2 = socket.id;
-                    p2_set = false;
-                }
-
-                console.log('p1 = ' + p1 + ' p2 = ' + p2);
-
-                players[0] = p1;
-                players[1] = p2;
-                console.log('*******************    on someone connected = ' + players);
-
-                if (!p1_set) {
-                    sock = p1;
-                    socket.emit('setId', sock);   // send only to the thing that connected
-                    console.log('p1*********** set snake id *************')
-                    console.log('p1 = ' + p1);
-                    p1_set = true;
-                }
-                if (!p2_set) {
-                    sock = p2;
-                    socket.emit('setId', sock);   // send only to the thing that connected
-                    console.log('p2*********** set snake id *************')
-                    console.log('p2 = ' + p2);
-                    p2_set = true;
-                }
-
-                //     players[socket.id] = null; // placeholder until the player updates with their full info
-*/
-
-            });
+        });
 
 
-            io.sockets.on('snakeCollideSelf', function(id){
-            //   // find player in players obj and update
-            //   // players[player.id] = player;
-                socket.emit('snakeCollidedSelf', id);
+        socket.on('snakeCollideSelf', function(id){
+        //   // find player in players obj and update
+        //   // players[player.id] = player;
+            socket.emit('snakeCollidedSelf', id);
 
-            });
+        });
 
-            io.sockets.on('snakeCollideWall', function(id){
-              //   // find player in players obj and update
-              //   // players[player.id] = player;
-                socket.emit('snakeCollidedWall', id);
+        socket.on('snakeCollideWall', function(id){
+          //   // find player in players obj and update
+          //   // players[player.id] = player;
+            socket.emit('snakeCollidedWall', id);
 
-            });
+        });
 
-            io.sockets.on('snakeEatApple', function(id){
-              //   // find player in players obj and update
-              //   // players[player.id] = player;
-                socket.emit('snakeAteApple', id);
+        socket.on('snakeEatApple', function(id){
+          //   // find player in players obj and update
+          //   // players[player.id] = player;
+            socket.emit('snakeAteApple', id);
 
-            });
+        });
 
 
+        // Clara's coding for sockets-circles
+        socket.on('playerEaten', function(player){
+        // remove player from players object
+            console.log('player was eaten', player);
+            delete players[player.id];                         //todo figure out what to do with this
+            socket.emit('allPlayerLocations', players);
 
-            io.sockets.on('playerEaten', function(player){
-            // remove player from players object
-                console.log('player was eaten', player);
-                delete players[player.id];                         //todo figure out what to do with this
-                socket.emit('allPlayerLocations', players);
+        });
 
-            });
+        //https://stackoverflow.com/questions/33136892/socketio-client-silently-loses-connection-and-creates-new-socket-transport-clos
+        socket.on('pong', function(data){
+            console.log("Pong received from client");
+        });
 
-            // Delete this player
-            io.sockets.on('disconnect', function() {
-                console.log('before delete ' + JSON.stringify(players + ' socketid = ' + socket.id));
-                delete players[socket.id];
+        // Delete this player
+        socket.on('disconnect', function() {
 
-                for (var i = 0; i < players.length; i++) {
-                  if (socket.id = players[i]) {
-                    players[i] = '';
-                    if (i = 0) { p1_set = false; p1='' };
-                    if (i = 1) { p2_set = false; p2='' };
-                  }
-                }
+            console.log('############################# disconnected #############################');
+            console.log('socket.id = ' + JSON.stringify(socket.id));
+            console.log('');
 
-                console.log('########################################## disconnected #############################');
-                console.log('after delete ' + JSON.stringify(players));
-            });
+
+            console.log('before delete ' + JSON.stringify(players) + ' holdId = ' + holdId);
+            // delete players[Object.keys(players)[0]]; // didn't work correctly
+            delete players[socket.id];
+            countPlayers--;
+
+            console.log('############################# disconnected #############################');
+            console.log('after delete ' + JSON.stringify(players));
+            console.log('holdId = ' + holdId);
+
+        });
+
+
+        //https://stackoverflow.com/questions/33136892/socketio-client-silently-loses-connection-and-creates-new-socket-transport-clos
+        // fixes problem with connecting/reconnecting as new client
+        function sendHeartbeat(){
+            setTimeout(sendHeartbeat, 8000);
+            socket.emit('ping', { beat : 1 });
+        }
+
+        setTimeout(sendHeartbeat, 8000);
 
     })
 
 }
 
+
 module.exports = init;
+
+
+
