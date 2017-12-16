@@ -67,8 +67,10 @@
     var initialized = false;
 
     // Images
-    var images = [];
+    var imagesG = [];
+    var imagesB = [];
     var tileimage;
+
 
 
     // Image loading global variables
@@ -303,6 +305,13 @@
     // Initialize the snake at a location
     Snake.prototype.init = function(id, x, y, direction, speed, numsegments) {
         this.id = id;                      // sockets id
+        /*
+        if (countPlayers === 1) {        // countPlayers set in gameSocket.js, if 1, first player of two
+            this.color = "g";           // green snake
+        } else {
+            this.color = "b";           // blue snake
+        }
+        */
         this.x = x;
         this.y = y;
         this.direction = direction; // Up, Right, Down, Left
@@ -373,9 +382,10 @@
     };
 
     // Create objects
-    //var snake = new Snake();
     var model = new Snake();
-    var snake = model;               // make a copy to switch back and forth between model and opponent
+    var snake = model;
+    //var snake = new Snake();
+    //Object.assign(snake, model);  // make a copy to switch back and forth between model and opponent
 
     console.log('in init - ------------------------------------  model = ' + JSON.stringify(model));
     // var level = new Level(20, 15, 32, 32);  //original
@@ -397,26 +407,25 @@
     var wallValue = 1;          // grid values in 2 dimension array used for collision detection
     var appleValue = 2;
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
-    var opponent = null;         // id of opponents on other web pages
     var playThisSnake = false;   // switch controls updating snake or opponent
-    var sOpponent = {};
     var oppoSnake = {};                   // hold copy of snake
-
+    var playerIDs = {};          // player id's of this client and opponent
+    var runLoop;                 // animation variable used to turn on/off animation loop
+    var mainPlayerCount;           // set in gameSocket.js 1 = first player = green snake, 2 = second = blue
+    var IamGreen = false;
 
 
     // Initialize the game
     function init() {
         // Load images
-        images = loadImages(["./images/snake-graphics.png"]);
-        tileimage = images[0];
-        //for (item in tileimage) {
-        //    console.log('tileimage = ' + tileimage[item]);
-        //}
+        imagesG = loadImages(["./images/snake-graphics.png"]);
+        imagesB = loadImages(["./images/snake-graphics blue.png"]);
+
+
         /*
         // Add mouse events
         canvas.addEventListener("mousedown", onMouseDown);
         */
-
 
         // Add keyboard events
         document.addEventListener("keydown", onKeyDown);
@@ -429,8 +438,20 @@
         main(0);
     }
 
+    function setColorValue(countPlayers) {
+        if (countPlayers === 1) {
+            IamGreen = true;
+            console.log('setColorValue setting IamGreen to true');
+        }
+        mainPlayerCount = countPlayers;
+        console.log('mainPlayerCount and countPlayers (from sockets:) = ' + mainPlayerCount);
+    }
+
     // Check if we can start a new game
     function tryNewGame() {
+
+        console.log('**************** TRY NEW GAME ********************')
+
         if (roundOverTime > gameoverdelay) {
             $('#lives').html(livesLeft);
      //       $('#highestscore').html(newHighScore);
@@ -455,16 +476,33 @@
             $('#hDate').html(user.highDate);
             $('#hComment').html(user.comment);
 
+            // Request animation frames
+            // runLoop = window.requestAnimationFrame(main);     // this get executed over and over
         }
     }
 
+    // called from gameSocket.js when opponent snake received
+    // determine if game loop running. if not, start it up
+    function checkGameState() {
+        if (gameover) {
+            tryNewGame();
+        }
+    }
 
+    function setOppoSnake(snk) {
+        oppoSnake = snk;
+        console.log('&&&&&&&&&&&&    setOppoSnake = ' + JSON.stringify(oppoSnake));
+    }
 
     function newGame() {
         // Initialize the model
-        var saveId = model.id;
-        model.init(0, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
-        model.id = saveId;
+    //    var saveId = model.id;
+
+
+        // init snake was here
+
+
+        //    model.id = saveId;
 
         // Generate the default level
         level.generate();
@@ -484,6 +522,15 @@
         $('#highestscore').html(user.highScore);
         $('#hDate').html(user.highDate);
         $('#hComment').html(user.comment);
+
+
+        console.log('newGame: IamGreen = ' + IamGreen);
+        if (IamGreen) {
+            model.init(model.id, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        } else {
+            model.init(model.id, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        }
+
 
 
     }
@@ -523,7 +570,7 @@
     // Main loop
     function main(tframe) {
         // Request animation frames
-        window.requestAnimationFrame(main);
+        runLoop = window.requestAnimationFrame(main);     // this get executed over and over
 
         if (!initialized) {
             // Preloader
@@ -548,7 +595,11 @@
             if (preloaded) {
                 initialized = true;
             }
+
+
         } else {
+
+
             // Update and render the game
             update(tframe);
             render();
@@ -570,33 +621,43 @@
         }
     }
 
+    function setModelID(id) {
+        console.log('setModelID = ' + JSON.stringify(id));
+        model.id = id;
+        snake.id = id;
+
+
+
+        console.log('newGame: IamGreen = ' + IamGreen + ' SECOND SETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        if (IamGreen) {
+            model.init(model.id, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        } else {
+            model.init(model.id, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        }
+
+
+
+
+
+    }
+
     function updateGame(dt) {
-
-
-        console.log('((((((((( ________________________ ))))))))))))))))');
-        console.log('         sendPosition model = ' + JSON.stringify(model));
-        console.log('((((((((( ________________________ ))))))))))))))))');
 
     //alternate player snake with opponent snake for the following functions
 
-        console.log('opponent = ' + JSON.stringify(opponent));
-        console.log('sOpponent = ' + JSON.stringify(sOpponent));
+
         console.log('model.id = ' + JSON.stringify(model.id));
-
-        /*
-        if ((sOpponent !== '' || sOpponent !== null) && (model.id === '' || model.id === null)) {
-            model.id = sOpponent[1];
-        }
-        */
+        console.log('playerIDs = ' + JSON.stringify(playerIDs));
+        console.log('oooooooooooo    player count = ' + mainPlayerCount + ' ooooooooooooooooo');
 
 
-        if (!playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
+        if (!playThisSnake && mainPlayerCount === 2) {
             playThisSnake = true;
             //model = oppoSnake;
             Object.assign(model,oppoSnake);
             console.log('setting model to opponent snake *************************************************')
         } else
-            if (playThisSnake && oppoSnake !== null && typeof oppoSnake !== 'undefined') {
+        if (playThisSnake && mainPlayerCount === 2) {
             //model = snake;            // snake and model are sourced from the same thing
             Object.assign(model,snake);
             playThisSnake = false;
@@ -606,6 +667,7 @@
             //model = snake;
             console.log('single player setting model to snake *********************************************')
         }
+
 
 
         console.log('snake = ' + JSON.stringify(snake));
@@ -631,8 +693,7 @@
                 if (level.tiles[nx][ny] === wallValue) {
                     // Collision with a wall
                     gameover = true;
-                    snakeCollideWall(model.id);
-
+                    snakeCollideWall(model);
                 }
 
                 // sockets add call to server to notify players of collision
@@ -691,11 +752,13 @@
 
                     }
 
+
+                    console.log('((((((((( ________________________ ))))))))))))))))');
+                    console.log('         sendPosition model = ' + JSON.stringify(model));
+                    console.log('((((((((( ________________________ ))))))))))))))))');
                     // Sockets send player's new position to the server.
                     sendPosition(model);
 
-
-                    //console.log('snakeGame: after sendPosition call, model.id = ' + model.id);
 
                 }
             } else {
@@ -720,9 +783,17 @@
                     newHighScore = score;
                     updateDatabase(newHighScore);
                 }
+
+                // window.cancelAnimationFrame(runLoop);
             }
         }
     }
+
+
+    function message(msg) {
+        console.log('over the limit for players, msg = ' + msg);
+    }
+
 
     // send messages to server
     function snakeCollideWall(id) {
@@ -837,6 +908,16 @@
 
     // Draw the level tiles
     function drawLevel() {
+
+        if (IamGreen) {       // first snake is green, second is blue
+            tileimage = imagesG[0];
+            //console.log('init: snake is green');
+        } else {
+            tileimage = imagesB[0];
+            //console.log('init: snake is blue');
+        }
+
+
         for (var i=0; i<level.columns; i++) {
             for (var j=0; j<level.rows; j++) {
                 // Get the current tile and location
@@ -882,6 +963,8 @@
 
     // Draw the snake
     function drawSnake() {
+
+
         // Loop over every snake segment
         for (var i=0; i<model.segments.length; i++) {
             var segment = model.segments[i];
@@ -1034,6 +1117,7 @@
     }
     */
 
+    console.log('maybe fell through to bottom of code, call init()');
     // Call init to start the game
     init();
 

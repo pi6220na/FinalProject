@@ -1,6 +1,5 @@
 //window.onload = function() {
 
-
 // game.js code copied from Clara's Circles game
 
     var socket = io();
@@ -14,8 +13,13 @@
 
     // socket send to sever functions
 
+
     function sendPosition(model) {
         socket.emit('currentPosition', model);
+    }
+
+    function sendCollideWall(model) {
+        socket.broadcast.emit('snakeCollideWall', model);
     }
 
 
@@ -30,14 +34,37 @@
         socket.emit('playerEaten', opponent);
     }
 
+    /*
+    function collidedWithWall(snake) {
+        console.log('received collidedWithWall message from server');
+        socket.broadcast.emit('Opponent has hit a wall');
+        // will need to handle this message in game loop, if getting message in snakeGame.js must be opponent
+
+    }
+    */
 
     // socket receive from sever functions
 
 
+/*
 //https://stackoverflow.com/questions/33136892/socketio-client-silently-loses-connection-and-creates-new-socket-transport-clos
 // fixes problem with connecting/reconnecting as new client
     socket.on('ping', function(data){
         socket.emit('pong', {beat: 1});
+    });
+*/
+
+    socket.on('snakeCollidedWall', function(model) {
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('sockets: setting gameover to true where snakeCollidedWall')
+        console.log('');
+        console.log('');
+        console.log('');
+        gameover = true;
+        Object.assign(oppoSnake, model);
+
     });
 
 
@@ -49,6 +76,8 @@
         console.log('socket: setId = ' + id);
         console.log('socket: model.id = ' + model.id);
 
+        setModelID(id);
+
     });
 
     socket.on('allPlayerLocations', function (snake) {
@@ -56,32 +85,38 @@
 
         console.log('socket: allPlayerLocations snake (from game.js snake = ' + JSON.stringify(snake));
 
+        checkGameState();
+
+        //Object.assign(oppoSnake, snake);
+
+
+        setOppoSnake(snake);
+
+
         oppoSnake = snake;
-        sOpponent = snake;
 
         console.log('***** socket: oppoSnake = ' + JSON.stringify(oppoSnake));
-        console.log('***** socket: sOpponent = ' + JSON.stringify(sOpponent));
+
     })
 
-    socket.on('allPlayerLocationsID', function (snake) {
+    socket.on('allPlayerLocationsID', function (player) {                   // was snake being passed in
 
-        console.log('socket: allPlayerLocationsID id = ' + JSON.stringify(snake));
+        console.log('socket: allPlayerLocationsID id = ' + JSON.stringify(player));
+        var countPlayers = 0;
 
-        oppoSnake = model;
-        //sOpponent = snake;
+        playerIDs = player;              // was opposnake being set to snake
+        for (item in player) {
+            countPlayers++;              // count = 1, this is the first player
+        }
 
-        //console.log('socket: oppoSnake = ' + JSON.stringify(oppoSnake));
-        console.log('socket: sOpponent = ' + JSON.stringify(sOpponent));
-
-        // trigger off sending snake to opponent
-
-
+        setColorValue(countPlayers);
+        console.log('socket: countPlayers = ' + countPlayers);
 
     })
 
     socket.on('atMaxPlayers', function (players) {
         message('Reached max players for multiplayer')
-        preventStart()
+        // preventStart()
     })
 
 //}

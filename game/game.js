@@ -9,7 +9,7 @@ var firstTime = true;
 
 const MAX_PLAYERS = 2;
 
-io = require( 'socket.io' );  //( { pingInterval: 60000 } );  // was 60000
+io = require( 'socket.io' );  //( { pingInterval: 60000 } );
 
 var holdId = "";
 
@@ -53,13 +53,9 @@ function init(io) {
         // find player in players obj and update
         // receive snake object and pass to other player
 
-            console.log(' ');
-            console.log('game.js: setting oppoSnake model = ' + JSON.stringify(model));
-            console.log(' ');
-
             oppoSnake = model;                            // set opponent snake object
             console.log(' ');
-            console.log('game.js: setting oppoSnake opposnake = ' + JSON.stringify(oppoSnake));
+            console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
             console.log(' ');
 
 
@@ -77,10 +73,10 @@ function init(io) {
 
         });
 
-        socket.on('snakeCollideWall', function(id){
+        socket.on('snakeCollideWall', function(model){
           //   // find player in players obj and update
           //   // players[player.id] = player;
-            socket.emit('snakeCollidedWall', id);
+            socket.broadcast.emit('snakeCollidedWall', model);
 
         });
 
@@ -126,6 +122,7 @@ function init(io) {
         });
 
 
+/*
         //https://stackoverflow.com/questions/33136892/socketio-client-silently-loses-connection-and-creates-new-socket-transport-clos
         // fixes problem with connecting/reconnecting as new client
         function sendHeartbeat(){
@@ -134,6 +131,7 @@ function init(io) {
         }
 
         setTimeout(sendHeartbeat, 8000);
+*/
 
     })
 
