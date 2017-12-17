@@ -11,7 +11,7 @@
 // });
 
 
-    // socket send to sever functions
+    //***************                   socket send to sever functions               *********************
 
 
     function sendPosition(model) {
@@ -43,7 +43,7 @@
     }
     */
 
-    // socket receive from sever functions
+    //***************                  socket receive from sever functions                **********************
 
 
 /*
@@ -72,9 +72,9 @@
     socket.on('setId', function(id) {
 
         console.log('*********************************   set model.id   ********************************');
-        model.id = id;
+        //model.id = id;
         console.log('socket: setId = ' + id);
-        console.log('socket: model.id = ' + model.id);
+        //console.log('socket: model.id = ' + model.id);
 
         setModelID(id);
 
@@ -85,19 +85,15 @@
 
         console.log('socket: allPlayerLocations snake (from game.js snake = ' + JSON.stringify(snake));
 
-        checkGameState();
+        checkGameState();    // checks if gameover, trys to start a new game
 
-        //Object.assign(oppoSnake, snake);
+        setOppoSnake(snake);   // passes client snake to opponent
 
-
-        setOppoSnake(snake);
-
-
-        oppoSnake = snake;
+        // oppoSnake = snake;  // probably useless
 
         console.log('***** socket: oppoSnake = ' + JSON.stringify(oppoSnake));
 
-    })
+    });
 
     socket.on('allPlayerLocationsID', function (player) {                   // was snake being passed in
 
@@ -112,11 +108,11 @@
         setColorValue(countPlayers);
         console.log('socket: countPlayers = ' + countPlayers);
 
-    })
+    });
 
     socket.on('atMaxPlayers', function (players) {
         message('Reached max players for multiplayer')
         // preventStart()
-    })
+    });
 
 //}

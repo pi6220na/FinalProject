@@ -18,24 +18,22 @@ function init(io) {
 
     io.on('connect', function(socket){
 
-        console.log('someone connected', socket.id);
-
+        console.log('game.js:   someone connected', socket.id);
         holdId = socket.id;  // this is the id of the "owner" or client connecting to sockets
-
         players[socket.id] = socket.id;
-        // socket.emit('allPlayerLocations', players);  // send to everyone.    //
+
+
         io.emit('allPlayerLocationsID', players);  // send to everyone.    //
+
 
         countPlayers = 0;
         for (item in players) {
-            console.log('at top, someone connected, item = ' + item);
+            //console.log('at top, someone connected, item = ' + item);
             countPlayers++;
         }
-
         console.log('game.js:  countPlayers = ' + countPlayers);
 
         if (countPlayers <= MAX_PLAYERS) {
-
             socket.emit('setId', socket.id);   // send only to the thing that connected    // was .emit
 
         } else {
