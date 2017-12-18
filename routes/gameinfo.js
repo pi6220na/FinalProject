@@ -13,6 +13,9 @@ router.get('/', isLoggedIn, function(req, res, next) {
     //This will probably be the home page for your application
     // JSON code is Clara's passes req.user to index.hbs (from server to client)
     res.render('index', { user : JSON.stringify(req.user) });
+    //res.render('index', { user : JSON.stringify(req.user), snake : JSON.stringify(req.snake) });
+
+
 });
 
 

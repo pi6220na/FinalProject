@@ -18,6 +18,21 @@
         socket.emit('currentPosition', model);
     }
 
+    function sendSnakeInPlay() {
+        console.log('');
+        console.log('sendSnakeInPlay function in gameSocket.js')
+        for (item in snake) {
+            console.log('item = ' + item + ' snake[item] = ' +snake[item]);
+        }
+        console.log('');
+        socket.emit('snakeInPlay', snake);
+    }
+
+    function sendOppoSnakeInPlay() {
+        socket.emit('oppoSnakeInPlay', oppoSnake);
+    }
+
+
     function sendCollideWall(model) {
         socket.broadcast.emit('snakeCollideWall', model);
     }
@@ -80,7 +95,27 @@
 
     });
 
-    socket.on('allPlayerLocations', function (snake) {
+    socket.on('snakeInPlay', function (snake) {
+
+        console.log('socket: calling  snakeInPlay  function  snake = ' + JSON.stringify(snake));
+        for (item in snake) {
+            console.log('item = ' + item + ' snake[item] = ' +snake[item]);
+        }
+        snakeInPlay(snake);
+
+    });
+
+    socket.on('oppoSnakeInPlay', function (oppoSnake) {
+
+        console.log('socket: calling  oppoSnakeInPlay  function  opposnake = ' + JSON.stringify(oppoSnake));
+
+        oppoSnakeInPlay(oppoSnake);
+
+    });
+
+
+
+socket.on('allPlayerLocations', function (snake) {
         // console.log('rec all locations', players)
 
         console.log('socket: allPlayerLocations snake (from game.js snake = ' + JSON.stringify(snake));

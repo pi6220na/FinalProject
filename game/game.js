@@ -51,9 +51,13 @@ function init(io) {
         // find player in players obj and update
         // receive snake object and pass to other player
 
-            oppoSnake = model;                            // set opponent snake object
+            //oppoSnake = model;                            // set opponent snake object
+
+            snake = model;                            // set opponent snake object
+
             console.log(' ');
-            console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
+            //console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
+            console.log('game.js: setting snake to model = ' + JSON.stringify(snake));
             console.log(' ');
 
 
@@ -61,6 +65,36 @@ function init(io) {
             //socket.emit('allPlayerLocations', model);          // send to sender-client only
             //io.emit('allPlayerLocations', model);           // send to all players
 
+        });
+
+        socket.on('snakeInPlay', function(snake){
+            // find player in players obj and update
+            // receive snake object and pass to other player
+
+            console.log(' ');
+            //console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
+            console.log('game.js: setting snakeInPlay');
+            for (item in snake) {
+                console.log('item = ' + item + ' snake[item] = ' +snake[item]);
+            }
+            console.log(' ');
+
+
+            socket.broadcast.emit('snakeInPlay', snake);  //send out to other player
+        });
+
+
+        socket.on('oppoSnakeInPlay', function(oppoSnake){
+            // find player in players obj and update
+            // receive snake object and pass to other player
+
+            console.log(' ');
+            //console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
+            console.log('game.js: setting oppoSnakeInPlay');
+            console.log(' ');
+
+
+            socket.broadcast.emit('oppoSnakeInPlay', oppoSnake);  //send out to other player
         });
 
 
