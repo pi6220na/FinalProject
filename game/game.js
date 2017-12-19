@@ -68,15 +68,13 @@ function init(io) {
         });
 
         socket.on('snakeInPlay', function(snake){
-            // find player in players obj and update
-            // receive snake object and pass to other player
-
+            //
             console.log(' ');
             //console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));
             console.log('game.js: setting snakeInPlay');
-            for (item in snake) {
-                console.log('item = ' + item + ' snake[item] = ' +snake[item]);
-            }
+            //for (item in snake) {
+            //    console.log('item = ' + item + ' snake[item] = ' +snake[item]);
+            //}
             console.log(' ');
 
 
@@ -105,10 +103,10 @@ function init(io) {
 
         });
 
-        socket.on('snakeCollideWall', function(model){
+        socket.on('snakeCollideWall', function(id){
           //   // find player in players obj and update
           //   // players[player.id] = player;
-            socket.broadcast.emit('snakeCollidedWall', model);
+            socket.broadcast.emit('snakeCollidedWall', id);
 
         });
 
@@ -118,6 +116,28 @@ function init(io) {
             socket.emit('snakeAteApple', id);
 
         });
+
+        socket.on('oppoSnakeCollideSelf', function(id){
+            //   // find player in players obj and update
+            //   // players[player.id] = player;
+            socket.emit('oppoSnakeCollidedSelf', id);
+
+        });
+
+        socket.on('oppoSnakeCollideWall', function(id){
+            //   // find player in players obj and update
+            //   // players[player.id] = player;
+            socket.broadcast.emit('oppoSnakeCollidedWall', id);
+
+        });
+
+        socket.on('oppoSnakeEatApple', function(id){
+            //   // find player in players obj and update
+            //   // players[player.id] = player;
+            socket.emit('oppoSnakeAteApple', id);
+
+        });
+
 
 
         // Clara's coding for sockets-circles

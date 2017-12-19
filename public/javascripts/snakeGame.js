@@ -419,6 +419,7 @@
     var saveSnakeID;
     var saveoppoSnakeID;
     var passSnake = new Snake();
+    var passOppoSnake = new Snake();
 
     // Initialize the game
     function init() {
@@ -505,20 +506,25 @@
 
     // called from gameSocket.js when opponent snake received
     // determine if game loop running. if not, start it up
-    function checkGameState() {
-        if (gameoverS || gameoverO) {                       //gameover note need to determine S or O
-            tryNewGame();
-        }
-    }
+//    function checkGameState() {
+//        if (gameoverS || gameoverO) {                       //gameover note need to determine S or O
+//            tryNewGame();
+//        }
+//    }
 
     function setOppoSnake(snk) {
 
         //oppoSnake = snk;
         //console.log('&&&&&&&&&&&&    setOppoSnake = ' + JSON.stringify(oppoSnake) + '    &&&&&&&&&&&&&&&&&&&&');
 
-        snake = snk;
-        console.log('&&&&&&&&&&&&    setOppoSnake = ' + JSON.stringify(snake) + '    &&&&&&&&&&&&&&&&&&&&');
-
+        if (IamGreen) {
+            snake = snk;
+            console.log('&&&&&&&&&&&&    setSnake = ' + JSON.stringify(snake) + '    &&&&&&&&&&&&&&&&&&&&');
+        }
+        if (!IamGreen) {
+            oppoSnake = snk;
+            console.log('&&&&&&&&&&&&    setOppoSnake = ' + JSON.stringify(oppoSnake) + '    &&&&&&&&&&&&&&&&&&&&');
+        }
     }
 
     function newGame() {
@@ -548,6 +554,18 @@
             $('.numbers').css('color', 'blue');
         }
 
+        /*
+        // reset snake to home position if starting a new round/game
+        //if (livesLeft === 5 && IamGreen) {
+        if (IamGreen) {
+            snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        }
+        //if (livesLeft === 5 && !IamGreen) {
+        if (!IamGreen) {
+            oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        }
+        */
+
         snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
         oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
 
@@ -557,67 +575,67 @@
     function addApple() {
         // Loop until we have a valid apple for each snake type, green or blue
 
-        var valid = false;
-        while (!valid) {
-            // Get a random position
-            var ax = randRange(0, level.columns-1);
-            var ay = randRange(0, level.rows-1);
+        if (IamGreen) {
+            var valid = false;
+            while (!valid) {
+                // Get a random position
+                var ax = randRange(0, level.columns - 1);
+                var ay = randRange(0, level.rows - 1);
 
-            // Make sure the snake doesn't overlap the new apple
-            var overlap = false;
-            for (var i=0; i<snake.segments.length; i++) {
-                // Get the position of the current snake segment
-                var sx = snake.segments[i].x;
-                var sy = snake.segments[i].y;
+                // Make sure the snake doesn't overlap the new apple
+                var overlap = false;
+                for (var i = 0; i < snake.segments.length; i++) {
+                    // Get the position of the current snake segment
+                    var sx = snake.segments[i].x;
+                    var sy = snake.segments[i].y;
 
-                // Check overlap
-                if (ax === sx && ay === sy) {
-                    overlap = true;
-                    break;
+                    // Check overlap
+                    if (ax === sx && ay === sy) {
+                        overlap = true;
+                        break;
+                    }
                 }
-            }
 
-            // Tile must be empty
-            if (!overlap && level.tiles[ax][ay] === 0) {
-                // Add an apple at the tile position
-                level.tiles[ax][ay] = 2;
-                valid = true;
+                // Tile must be empty
+                if (!overlap && level.tiles[ax][ay] === 0) {
+                    // Add an apple at the tile position
+                    level.tiles[ax][ay] = 2;
+                    valid = true;
+                }
             }
         }
 
+        //   figure out how to add second apple for opponent
 
-        /*   figure out how to add second apple for opponent
+        if (!IamGreen) {
+            valid = false;
+            while (!valid) {
+                // Get a random position
+                ax = randRange(0, level.columns - 1);
+                ay = randRange(0, level.rows - 1);
 
-        var valid = false;
-        while (!valid) {
-            // Get a random position
-            var ax = randRange(0, level.columns-1);
-            var ay = randRange(0, level.rows-1);
+                // Make sure the snake doesn't overlap the new apple
+                overlap = false;
+                for (i = 0; i < oppoSnake.segments.length; i++) {
+                    // Get the position of the current snake segment
+                    sx = oppoSnake.segments[i].x;
+                    sy = oppoSnake.segments[i].y;
 
-            // Make sure the snake doesn't overlap the new apple
-            var overlap = false;
-            for (var i=0; i<oppoSnake.segments.length; i++) {
-                // Get the position of the current snake segment
-                var sx = oppoSnake.segments[i].x;
-                var sy = oppoSnake.segments[i].y;
+                    // Check overlap
+                    if (ax === sx && ay === sy) {
+                        overlap = true;
+                        break;
+                    }
+                }
 
-                // Check overlap
-                if (ax === sx && ay === sy) {
-                    overlap = true;
-                    break;
+                // Tile must be empty
+                if (!overlap && level.tiles[ax][ay] === 0) {
+                    // Add an apple at the tile position
+                    level.tiles[ax][ay] = 2;
+                    valid = true;
                 }
             }
-
-            // Tile must be empty
-            if (!overlap && level.tiles[ax][ay] === 0) {
-                // Add an apple at the tile position
-                level.tiles[ax][ay] = 2;
-                valid = true;
-            }
         }
-
-        */
-
     }
 
     // Main loop
@@ -719,7 +737,10 @@
     }
 
     function snakeInPlay(snakeIn) {
+        // have to recreate snake to pick up prototype methods that get dropped by sockets.io
         console.log('entering snakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
+
+        passSnake = new Snake();
 
         passSnake.id = snakeIn.id;
         passSnake.x = snakeIn.x;
@@ -731,25 +752,34 @@
         //for (item in passSnake) {
         //    console.log('item = ' + item + ' passSnake[item] = ' + passSnake[item]);
         //}
+
+        //var snake = Object.assign( {}, passSnake);
         snake = passSnake;
         snake.move();
+
     }
 
      function oppoSnakeInPlay(snakeIn) {
+         // have to recreate snake to pick up prototype methods that get dropped by sockets.io
          console.log('entering oppoSnakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
 
-         passSnake.id = snakeIn.id;
-         passSnake.x = snakeIn.x;
-         passSnake.y = snakeIn.y;
-         passSnake.direction = snakeIn.direction;
-         passSnake.speed = snakeIn.speed;
-         passSnake.movedelay = snakeIn.movedelay;
-         passSnake.segments = snakeIn.segments.slice(0);
-         //for (item in passSnake) {
-         //    console.log('item = ' + item + ' passSnake[item] = ' + passSnake[item]);
+         passOppoSnake = new Snake();
+
+         passOppoSnake.id = snakeIn.id;
+         passOppoSnake.x = snakeIn.x;
+         passOppoSnake.y = snakeIn.y;
+         passOppoSnake.direction = snakeIn.direction;
+         passOppoSnake.speed = snakeIn.speed;
+         passOppoSnake.movedelay = snakeIn.movedelay;
+         passOppoSnake.segments = snakeIn.segments.slice(0);
+         //for (item in passOppoSnake) {
+         //    console.log('item = ' + item + ' passOppoSnake[item] = ' + passOppoSnake[item]);
          //}
-         oppoSnake = passSnake;
+
+         //var oppoSnake = Object.assign({}, passOppoSnake);
+         oppoSnake = passOppoSnake;
          oppoSnake.move();
+
     }
 
 
@@ -778,7 +808,7 @@ function updateGameS(dt) {       // green snake, client
                 if (level.tiles[nx][ny] === wallValue) {
                     // Collision with a wall
                     gameoverS = true;
-                    snakeCollideWall(snake);
+                    snakeCollideWall(snake.id);
                 }
 
                 // sockets add call to server to notify players of collision
@@ -837,13 +867,13 @@ function updateGameS(dt) {       // green snake, client
 
                     }
 
-
+/*
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     console.log('         sendPosition snake = ' + JSON.stringify(snake));
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     // Sockets send player's new position to the server.
                     sendPosition(snake);
-
+*/
 
                 }
             } else {
@@ -897,7 +927,7 @@ function updateGameS(dt) {       // green snake, client
                 if (level.tiles[nx][ny] === wallValue) {
                     // Collision with a wall
                     gameoverO = true;
-                    snakeCollideWall(oppoSnake);
+                    oppoSnakeCollideWall(oppoSnake.id);
                 }
 
                 // sockets add call to server to notify players of collision
@@ -910,7 +940,7 @@ function updateGameS(dt) {       // green snake, client
                     if (nx === sx && ny === sy) {
                         // Found a snake part
                         gameoverO = true;
-                        snakeCollideSelf(oppoSnake.id);  // sockets call
+                        oppoSnakeCollideSelf(oppoSnake.id);  // sockets call
                         break;
                     }
                 }
@@ -928,7 +958,7 @@ function updateGameS(dt) {       // green snake, client
 
                         // Add a new apple
                         addApple();
-                        snakeEatApple(oppoSnake.id);          // sockets call
+                        oppoSnakeEatApple(oppoSnake.id);          // sockets call
 
                         // Grow the snake
                         oppoSnake.grow();
@@ -956,13 +986,13 @@ function updateGameS(dt) {       // green snake, client
 
                     }
 
-
+/*
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     console.log('         sendPosition oppoSnake = ' + JSON.stringify(oppoSnake));
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     // Sockets send player's new position to the server.
                     sendPosition(oppoSnake);
-
+*/
 
                 }
             } else {
@@ -1001,6 +1031,7 @@ function updateGameS(dt) {       // green snake, client
 
 
     // send messages to server
+
     function snakeCollideWall(id) {
         console.log('snake collided with wall');
         socket.emit('snakeCollideWall', id);
@@ -1014,6 +1045,32 @@ function updateGameS(dt) {       // green snake, client
     function snakeEatApple(id) {
         console.log('snake ate apple');
         socket.emit('snakeAteApple', id);
+    }
+
+
+    function oppoSnakeCollideWall(id) {
+        console.log('oppoSnake collided with wall');
+        socket.emit('oppoSnakeCollideWall', id);
+    }
+
+    function oppoSnakeCollideSelf(id) {
+        console.log('oppoSnake collided with self');
+        socket.emit('oppoSnakeCollideSelf', id);
+    }
+
+    function oppoSnakeEatApple(id) {
+        console.log('oppoSnake ate apple');
+        socket.emit('oppoSnakeAteApple', id);
+    }
+
+
+// messages from server
+    function setSnakeGameOver() {
+        gameoverS = true;
+    }
+
+    function setOppoSnakeGameOver() {
+        gameoverO = true;
     }
 
     // slows down speed of snake? Both fpstime and framecount are not used... ? must be for future release original code ?
@@ -1409,8 +1466,8 @@ function updateGameS(dt) {       // green snake, client
                 tryNewGame();
             } else if (e.keyCode === 71 && livesLeft <= 0) {  // if 'g' pressed and lives left 0 or less, start new game
                 livesLeft = maxlives;
-                gameoverS = false;
-                gameoverO = true;
+                gameoverO = false;
+                gameoverS = true;
                 tryNewGame();
             }
         } else {
