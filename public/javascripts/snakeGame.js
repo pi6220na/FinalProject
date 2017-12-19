@@ -17,6 +17,9 @@
 // 12/10/2017
 //#############################################################
 
+// note on sockets: https://stackoverflow.com/questions/30550076/socket-io-passing-javascript-object
+
+
 // ------------------------------------------------------------
 // Creating A Snake Game Tutorial With HTML5
 // Copyright (c) 2015 Rembound.com
@@ -722,12 +725,12 @@
         if (mainPlayerCount === 2) {
             if (!gameoverS) {
                 // send message to opponent
-                sendSnakeInPlay(snake);
+                //sendSnakeInPlay(snake);
                 updateGameS(dt);
 
             }
             if (!gameoverO) {
-                sendOppoSnakeInPlay(oppoSnake);
+                //sendOppoSnakeInPlay(oppoSnake);
                 updateGameO(dt);
             }
         } else {
@@ -873,7 +876,9 @@ function updateGameS(dt) {       // green snake, client
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     // Sockets send player's new position to the server.
                     sendPosition(snake);
+
 */
+                    sendSnakeInPlay(snake);
 
                 }
             } else {
@@ -993,6 +998,7 @@ function updateGameS(dt) {       // green snake, client
                     // Sockets send player's new position to the server.
                     sendPosition(oppoSnake);
 */
+                    sendOppoSnakeInPlay(oppoSnake);
 
                 }
             } else {
@@ -1099,7 +1105,7 @@ function updateGameS(dt) {       // green snake, client
         drawSnake();
 
         // Game over
-        if (gameoverS || gameoverO) {
+        if ( (gameoverS && IamGreen) || (gameoverO && !IamGreen) ) {
             //context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillRect(0, 0, canvas.width, canvas.height);
