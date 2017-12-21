@@ -395,6 +395,7 @@
     console.log('in init - -------------  oppoSnake = ' + JSON.stringify(oppoSnake));
     // var level = new Level(20, 15, 32, 32);  //original
     var level = new Level(48, 36, 16, 16);   // (columns, rows, tilewidth, tileheight)
+    //var level = new Level(96, 72, 8, 8);   // (columns, rows, tilewidth, tileheight) //super small grid
 
 
     // Variables
@@ -411,7 +412,8 @@
     var gameLevel = 1;         // number of levels to play, advances after completing TODO rounds
     var sSpeed = 10;           // initial speed, bumped to 15 for level 2
     var wallValue = 1;          // grid values in 2 dimension array used for collision detection
-    var appleValue = 2;
+    var gAppleValue = 2;
+    var bAppleValue = 3;
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
     var playThisSnake = false;   // switch controls updating snake or opponent
     //var oppoSnake = {};                   // hold copy of snake
@@ -427,8 +429,8 @@
     // Initialize the game
     function init() {
         // Load images
-        imagesG = loadImages(["./images/snake-graphics.png"]);
-        imagesB = loadImages(["./images/snake-graphics blue.png"]);
+        imagesG = loadImages(["./images/snake-graphics green apple.png"]);
+        imagesB = loadImages(["./images/snake-graphics blue apple.png"]);
         /*
         // Add mouse events
         canvas.addEventListener("mousedown", onMouseDown);
@@ -600,9 +602,9 @@
                 }
 
                 // Tile must be empty
-                if (!overlap && level.tiles[ax][ay] === 0) {
+                if (!overlap && level.tiles[ax][ay] === openValue) {
                     // Add an apple at the tile position
-                    level.tiles[ax][ay] = 2;
+                    level.tiles[ax][ay] = gAppleValue;
                     valid = true;
                 }
             }
@@ -632,9 +634,9 @@
                 }
 
                 // Tile must be empty
-                if (!overlap && level.tiles[ax][ay] === 0) {
+                if (!overlap && level.tiles[ax][ay] === openValue) {
                     // Add an apple at the tile position
-                    level.tiles[ax][ay] = 2;
+                    level.tiles[ax][ay] = bAppleValue;
                     valid = true;
                 }
             }
@@ -836,7 +838,7 @@ function updateGameS(dt) {       // green snake, client
                     snake.move();
 
                     // Check collision with an apple
-                    if (level.tiles[nx][ny] === appleValue) {
+                    if (level.tiles[nx][ny] === gAppleValue) {
                         // Remove the apple
                         level.tiles[nx][ny] = 0;
 
@@ -957,7 +959,7 @@ function updateGameS(dt) {       // green snake, client
                     oppoSnake.move();
 
                     // Check collision with an apple
-                    if (level.tiles[nx][ny] === appleValue) {
+                    if (level.tiles[nx][ny] === bAppleValue) {
                         // Remove the apple
                         level.tiles[nx][ny] = 0;
 
@@ -1178,10 +1180,13 @@ function updateGameS(dt) {       // green snake, client
     function drawLevel() {
 
         if (mainPlayerCount === 2) {
-            tileimage = imagesG[0];
-            drawLevelItems();
-            tileimage = imagesB[0];
-            drawLevelItems();
+            if (IamGreen) {
+                tileimage = imagesG[0];
+                drawLevelItems();
+            } else {
+                tileimage = imagesB[0];
+                drawLevelItems();
+            }
         } else {
             tileimage = imagesG[0];
             drawLevelItems();
@@ -1215,7 +1220,7 @@ function updateGameS(dt) {       // green snake, client
                     var tileh = 64;
                     //context.drawImage(wallimage, tx*tilew, ty*tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
                     context.drawImage(tileimage,tx*tilew, ty*tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
-                } else if (tile === appleValue) {
+                } else if (tile === gAppleValue || tile === bAppleValue) {
                     // Apple
 
                     // Draw apple background
