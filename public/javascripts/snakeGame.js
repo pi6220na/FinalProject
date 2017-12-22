@@ -44,10 +44,21 @@
 //window.onload = function() {
 
     // keep these displays
-    //console.log('inside snakeGame ... user._id = ' + user._id);
-    //for (item in user) {
-    //    console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
-    //}
+    console.log('inside snakeGame ... user._id = ' + user._id);
+    for (item in user) {
+        console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
+    }
+    for (item in logs[0]) {
+        console.log('snakegame logs item = ' + item + ' logs[item] = ' + logs[0][item]);
+    }
+    //console.log('logs[0][_id] = ' + logs[0][_id]);
+    console.log('logs = ' + JSON.stringify(logs));
+
+    console.log('logs id = ' + logs[0]._id);
+
+    console.log('inside snakeGame ... user[local] = ' + user.local.username);
+    console.log(user.highScore);
+    //console.log(user.local.username);
 
 
 // https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
@@ -447,6 +458,7 @@
         main(0);
     }
 
+    // called from
     function setColorValue(countPlayers) {
         if (countPlayers === 1) {
             IamGreen = true;
@@ -547,17 +559,18 @@
         //gameoverS = true;       // needed here?
         //gameoverO = true;
         roundover = false;
+        if (IamGreen) {
+            $('.numbers').css('color', 'green');
+        } else {
+            $('.numbers').css('color', 'blue');
+        }
         $('#scorethis').html("000");
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
         $('#highestscore').html(user.highScore);
         $('#hDate').html(user.highDate);
         $('#hComment').html(user.comment);
-        if (IamGreen) {
-            $('.numbers').css('color', 'green');
-        } else {
-            $('.numbers').css('color', 'blue');
-        }
+
 
         /*
         // reset snake to home position if starting a new round/game
@@ -1141,12 +1154,15 @@ function updateGameS(dt) {       // green snake, client
 
     function updateDatabase (HighScore) {
 
-        console.log('in updateDatabase _id = ' + user._id);
-        console.log(' in updateDatabase highScore = ' + HighScore);
+                // logs[0][item]
+        console.log('in updateDatabase logs._id = ' + logs[0]._id);
+        //console.log('in updateDatabase user.local = ' + user.local);
+        //console.log(' in updateDatabase highScore = ' + HighScore);
         $.ajax({
             method: "POST",
             url: "/update",
-            data: { highScore: HighScore, _id: user._id, highDate: Date.now(), comment: "placeholder" }
+            //data: { highScore: HighScore, username: user.local.username, highDate: Date.now(), comment: "placeholder" }
+            data: { _id: logs[0]._id, highScore: HighScore, highDate: Date.now(), comment: "placeholder" }
         }).done (function(data) {
             console.log('ajax success');
             //console.log('ajax success' + data);

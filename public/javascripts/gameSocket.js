@@ -162,7 +162,7 @@ function collidedWithWall(snake) {
     socket.on('oppoSnakeAteApple', function(id) {
         console.log('');
         console.log('');
-        console.log('sockets: setting gameover to true where oppoSnakeAteApple')
+        console.log('sockets: setting gameover to true where oppoSnakeAteApple');
         console.log('');
         console.log('');
 

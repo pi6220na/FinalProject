@@ -72,16 +72,19 @@
 <script>
     // Clara's code to receive user data from the server (where the DB info resides)
     var userJSON = '{{{user}}}';
+    var logsJSON = '{{{logs}}}';
 
     //console.log('index.hbs userJSON before converting to object = ' + userJSON);
 
     var user = JSON.parse(userJSON);
-    //for (item in user) {
-    //    console.log('index.hbs item = ' + item + ' user[item] = ' + user[item]);
-    //}
+    var logs = JSON.parse(logsJSON);
 
-    //var mySnakeJSON = '{{{snake}}}';
-    //var snake = JSON.parse(mySnakeJSON);
+    for (item in user) {
+        console.log('index.hbs user item = ' + item + ' user[item] = ' + user[item]);
+    }
+    for (item in logs) {
+        console.log('index.hbs logs item = ' + item + ' logs[item] = ' + logs[item]);
+    }
 
 
 </script>
