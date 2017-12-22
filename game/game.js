@@ -67,6 +67,18 @@ function init(io) {
 
         });
 
+
+        socket.on('getAndSendOppoSegments', function() {
+            socket.broadcast.emit('SendOppoSegments');  //send out to other player
+            //socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to player
+        });
+
+
+        socket.on('oppoSegments', function(oppoSnakesegments) {
+            socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to other player
+        });
+
+
         socket.on('snakeInPlay', function(snake){
             //
             console.log(' ');
