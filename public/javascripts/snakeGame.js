@@ -19,6 +19,11 @@
 
 // note on sockets: https://stackoverflow.com/questions/30550076/socket-io-passing-javascript-object
 
+// major variables:
+// mainplayercount===2 two players signed in
+// S = snake = green = IamGreen=true
+// O = oppoSnake = blue = IamGreen=false
+
 
 // ------------------------------------------------------------
 // Creating A Snake Game Tutorial With HTML5
@@ -436,6 +441,7 @@
     var saveoppoSnakeID;
     var passSnake = new Snake();
     var passOppoSnake = new Snake();
+    var oppoSnakeSegments;          // passed from opposing client, used to check for snake/snake collision
 
     // Initialize the game
     function init() {
@@ -844,6 +850,22 @@ function updateGameS(dt) {       // green snake, client
                     }
                 }
 
+                getOppoSegments();
+
+                // Collisions with oppo snake
+                for (var i=0; i< oppoSnakeSegments.length; i++) {
+                    var sx = oppoSnakeSegments[i].x;
+                    var sy = oppoSnakeSegments[i].y;
+
+                    if (nx === sx && ny === sy) {
+                        // Found a snake part
+                        gameoverS = true;
+                        snakeCollideSelf(snake.id);  // sockets call
+                        break;
+                    }
+                }
+
+
                 if (!gameoverS) {
                     // The snake is allowed to move
 
@@ -1048,6 +1070,14 @@ function updateGameS(dt) {       // green snake, client
 
     function message(msg) {
         console.log('over the limit for players, msg = ' + msg);
+    }
+
+    function SendOppoSegments() {
+        socket.emit('oppoSegments', oppoSnake.segments);
+    }
+
+    function returnOppoSegments(oppoSnakesegments) {
+        oppoSnakeSegments = oppoSnakesegments;
     }
 
 

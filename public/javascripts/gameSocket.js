@@ -18,6 +18,13 @@
         socket.emit('currentPosition', model);
     }
 
+    function getOppoSegments() {
+        socket.emit('getAndSendOppoSegments');
+    }
+
+
+
+
     function sendSnakeInPlay() {
         console.log('');
         console.log('sendSnakeInPlay function in gameSocket.js')
@@ -35,6 +42,11 @@
         console.log('');
         socket.emit('oppoSnakeInPlay', oppoSnake);
     }
+
+    function oppoSegments(oppoSnakesegments) {
+        socket.emit('oppoSegments', oppoSnakesegments);
+    }
+
 
 
     function snakeCollideWall(id) {
@@ -86,6 +98,16 @@ function collidedWithWall(snake) {
         socket.emit('pong', {beat: 1});
     });
 */
+
+    socket.on('SendOppoSegments', function () {
+        sendOppoSegments();
+    });
+
+
+    socket.on('returnOppoSegments', function(oppoSnakesegments) {
+        returnOppoSegments(oppoSnakesegments);
+    });
+
 
     socket.on('snakeCollidedWall', function(id) {
         console.log('');
