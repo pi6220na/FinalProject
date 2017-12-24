@@ -69,14 +69,31 @@ function init(io) {
 
 
         socket.on('getAndSendOppoSegments', function() {
-            socket.broadcast.emit('SendOppoSegments');  //send out to other player
+            socket.emit('SendOppoSegments');  //send out to other player
             //socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to player
         });
 
 
         socket.on('oppoSegments', function(oppoSnakesegments) {
+            console.log('game server: oppoSnakesegments = ' + oppoSnakesegments);
             socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to other player
         });
+
+
+
+        socket.on('getAndSendSnakeSegments', function() {
+            socket.emit('SendSnakeSegments');  //send out to other player
+            //socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to player
+        });
+
+
+        socket.on('snakeSegments', function(snakeSegments) {
+            console.log('game server: snakeSegments = ' + snakeSegments);
+            socket.emit('returnSnakeSegments', snakeSegments);  //send out to other player
+        });
+
+
+
 
 
         socket.on('snakeInPlay', function(snake){
@@ -114,6 +131,25 @@ function init(io) {
             socket.emit('snakeCollidedSelf', id);
 
         });
+
+
+        socket.on('snakeCollideOppo', function(){
+            //   // find player in players obj and update
+            //   // players[player.id] = player;
+            socket.emit('snakeCollidedOppo');
+
+        });
+
+
+
+        socket.on('snakeCollideSnake', function(){
+            //   // find player in players obj and update
+            //   // players[player.id] = player;
+            socket.emit('snakeCollidedSnake');
+
+        });
+
+
 
         socket.on('snakeCollideWall', function(id){
           //   // find player in players obj and update

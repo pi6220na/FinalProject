@@ -441,7 +441,9 @@
     var saveoppoSnakeID;
     var passSnake = new Snake();
     var passOppoSnake = new Snake();
-    var oppoSnakeSegments;          // passed from opposing client, used to check for snake/snake collision
+    var oppoSnakeSegments = [];          // passed from opposing client, used to check for snake/snake collision
+    var snakeSegments = [];
+    var snakesDied = false;
 
     // Initialize the game
     function init() {
@@ -850,21 +852,28 @@ function updateGameS(dt) {       // green snake, client
                     }
                 }
 
-                getOppoSegments();
+                if (mainPlayerCount > 1) {
+                    console.log('snakeGame: calling getOppoSegments() from updateGameS');
+                    getOppoSegments();
 
-                // Collisions with oppo snake
-                for (var i=0; i< oppoSnakeSegments.length; i++) {
-                    var sx = oppoSnakeSegments[i].x;
-                    var sy = oppoSnakeSegments[i].y;
+                    // Collisions with oppo snake
+                    console.log('snakeGame: oppoSnakeSeqments = ' + oppoSnakeSegments);
+                    console.log('snakeGame: oppoSnakeSeqments.length = ' + oppoSnakeSegments.length);
+                    for (var i = 0; i < oppoSnakeSegments.length; i++) {
+                        var sx = oppoSnakeSegments[i].x;
+                        var sy = oppoSnakeSegments[i].y;
 
-                    if (nx === sx && ny === sy) {
-                        // Found a snake part
-                        gameoverS = true;
-                        snakeCollideSelf(snake.id);  // sockets call
-                        break;
+                        if (nx === sx && ny === sy) {
+                            // Found a snake part
+                            gameoverS = true;
+                            snakeCollideOppo();  // sockets call
+                            snakesDied = true;
+                            break;
+                        } else {
+                            snakesDied = false;
+                        }
                     }
                 }
-
 
                 if (!gameoverS) {
                     // The snake is allowed to move
@@ -941,6 +950,9 @@ function updateGameS(dt) {       // green snake, client
                     updateDatabase(newHighScore);
                 }
 
+                if (snakesDied) {
+                    setSnakesDiedMessage();
+                }
                 // window.cancelAnimationFrame(runLoop);
             }
         }
@@ -986,6 +998,31 @@ function updateGameS(dt) {       // green snake, client
                         break;
                     }
                 }
+
+                if (mainPlayerCount > 1) {
+                    console.log('snakeGame: calling getSnakeSegments() from updateGameO');
+                    getSnakeSegments();
+
+                    // Collisions with snake
+                    console.log('snakeGame: snakeSeqments = ' + snakeSegments);
+                    console.log('snakeGame: snakeSeqments.length = ' + snakeSegments.length);
+                    for (var i = 0; i < snakeSegments.length; i++) {
+                        var sx = snakeSegments[i].x;
+                        var sy = snakeSegments[i].y;
+
+                        if (nx === sx && ny === sy) {
+                            // Found a snake part
+                            gameoverO = true;
+                            snakeCollideSnake();  // sockets call
+                            snakesDied = true;
+                            break;
+                        } else {
+                            snakesDied = false;
+                        }
+                    }
+                }
+
+
 
                 if (!gameoverO) {
                     // The snake is allowed to move
@@ -1061,6 +1098,11 @@ function updateGameS(dt) {       // green snake, client
                     updateDatabase(newHighScore);
                 }
 
+
+                if (snakesDied) {
+                    setSnakesDiedMessage();
+                }
+
                 // window.cancelAnimationFrame(runLoop);
             }
         }
@@ -1072,16 +1114,31 @@ function updateGameS(dt) {       // green snake, client
         console.log('over the limit for players, msg = ' + msg);
     }
 
+
+// snake collision detection functions
     function SendOppoSegments() {
+        console.log('snakeGame: SendOppoSegments() triggered');
         socket.emit('oppoSegments', oppoSnake.segments);
     }
 
     function returnOppoSegments(oppoSnakesegments) {
+        console.log('snakeGame: returnOppoSegments oppoSnakesegments = ' + oppoSnakesegments + ' length = ' + oppoSnakesegments.length);
         oppoSnakeSegments = oppoSnakesegments;
     }
 
+    function SendSnakeSegments() {
+        console.log('snakeGame: SendSnakeSegments() triggered');
+        socket.emit('snakeSegments', snake.segments);
+    }
 
-    // send messages to server
+    function returnSnakeSegments(snakesegments) {
+        console.log('snakeGame: returnSnakeSegments snakeSegments = ' + snakeSegments + ' length = ' + snakeSegments.length);
+        snakeSegments = snakesegments;
+    }
+
+
+
+// send messages to server
 
     function snakeCollideWall(id) {
         console.log('snake collided with wall');
@@ -1150,7 +1207,7 @@ function updateGameS(dt) {       // green snake, client
         drawSnake();
 
         // Game over
-        if ( (gameoverS && IamGreen) || (gameoverO && !IamGreen) ) {
+        if ( (gameoverS && IamGreen) || (gameoverO && !IamGreen || snakesDied) ) {
             //context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillStyle = "rgba(0, 0, 0, 0.5)";
             context.fillRect(0, 0, canvas.width, canvas.height);
@@ -1178,9 +1235,31 @@ function updateGameS(dt) {       // green snake, client
 
 
             }
-
+            if (snakesDied) {
+                drawLevel();
+                drawSnake();
+                setSnakesDiedMessage();
+            }
         }
     }
+
+    function setSnakesDiedMessage() {
+        console.log('snakeGame:    setSnakesDiedMessage() ');
+        context.fillStyle = "rgba(0, 0, 0, 0.5)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.fillStyle = "#ff0000";
+        context.font = "24px Creepster";
+        context.textAlign = 'center';
+        context.fillText("!!!!!!   BOTH SNAKES DIED   !!!!!!!", canvas.width / 2, canvas.height / 2);
+        if (livesLeft > 0) {
+            context.fillText("Press spacebar for next Snake!", canvas.width / 2, canvas.height / 2 + 25);
+        } else {
+            context.fillText("Press g to start a new game", canvas.width / 2, canvas.height / 2 + 25);
+        }
+
+    }
+
 
     function updateDatabase (HighScore) {
 

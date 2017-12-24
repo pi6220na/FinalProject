@@ -22,10 +22,14 @@
         socket.emit('getAndSendOppoSegments');
     }
 
+    function getSnakeSegments() {
+        socket.emit('getAndSendSnakeSegments');
+    }
 
 
 
-    function sendSnakeInPlay() {
+
+function sendSnakeInPlay() {
         console.log('');
         console.log('sendSnakeInPlay function in gameSocket.js')
         console.log('');
@@ -43,8 +47,24 @@
         socket.emit('oppoSnakeInPlay', oppoSnake);
     }
 
+
+    // snake collide functions
     function oppoSegments(oppoSnakesegments) {
         socket.emit('oppoSegments', oppoSnakesegments);
+    }
+
+
+    function snakeCollideOppo() {
+        socket.emit('snakeCollideOppo');
+    }
+
+    function snakeSegments(snakeSegments) {
+        socket.emit('snakeSegments', snakeSegments);
+    }
+
+
+    function snakeCollideSnake() {
+        socket.emit('snakeCollideSnake');
     }
 
 
@@ -100,13 +120,28 @@ function collidedWithWall(snake) {
 */
 
     socket.on('SendOppoSegments', function () {
-        sendOppoSegments();
+        SendOppoSegments();
     });
 
 
     socket.on('returnOppoSegments', function(oppoSnakesegments) {
+        console.log('gameSocket: oppoSnakesegments = ' + oppoSnakesegments);
         returnOppoSegments(oppoSnakesegments);
     });
+
+
+
+    socket.on('SendSnakeSegments', function () {
+        SendSnakeSegments();
+    });
+
+
+    socket.on('returnSnakeSegments', function(snakeSegments) {
+        console.log('gameSocket: snakeSegments = ' + snakeSegments);
+        returnSnakeSegments(snakeSegments);
+    });
+
+
 
 
     socket.on('snakeCollidedWall', function(id) {
@@ -137,6 +172,38 @@ function collidedWithWall(snake) {
 
     });
 
+
+    socket.on('snakeCollidedOppo', function() {
+        console.log('');
+        console.log('');
+        console.log('sockets: setting gameover to true where snakeCollidedOppo')
+        console.log('');
+        console.log('');
+
+        setSnakesDiedMessage();
+
+        // gameover = true;
+        // Object.assign(oppoSnake, id);  // needed? used?
+
+    });
+
+
+    socket.on('snakeCollidedSnake', function() {
+        console.log('');
+        console.log('');
+        console.log('sockets: setting gameover to true where snakeCollidedSnake')
+        console.log('');
+        console.log('');
+
+        setSnakesDiedMessage();
+
+        // gameover = true;
+        // Object.assign(oppoSnake, id);  // needed? used?
+
+    });
+
+
+
     socket.on('snakeAteApple', function(id) {
         console.log('');
         console.log('');
@@ -144,7 +211,7 @@ function collidedWithWall(snake) {
         console.log('');
         console.log('');
 
-        setSnakeGameOver();
+        setSnakesDiedMessage();
 
         // gameover = true;
         // Object.assign(oppoSnake, id);  // needed? used?
@@ -198,7 +265,7 @@ function collidedWithWall(snake) {
 
 
 
-socket.on('setId', function(id) {
+    socket.on('setId', function(id) {
 
         console.log('*********************************   set model.id   ********************************');
         //model.id = id;
@@ -229,7 +296,7 @@ socket.on('setId', function(id) {
 
 
 
-socket.on('allPlayerLocations', function (snake) {
+    socket.on('allPlayerLocations', function (snake) {
         // console.log('rec all locations', players)
 
         console.log('socket: allPlayerLocations snake (from game.js snake = ' + JSON.stringify(snake));
