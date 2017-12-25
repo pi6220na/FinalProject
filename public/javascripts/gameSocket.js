@@ -26,6 +26,9 @@
         socket.emit('getAndSendSnakeSegments');
     }
 
+    function sendSnakesDiedMessage() {
+        socket.emit('sendSnakesDiedMessage');
+    }
 
 
 
@@ -118,6 +121,11 @@ function collidedWithWall(snake) {
         socket.emit('pong', {beat: 1});
     });
 */
+
+    socket.on('SnakesDied', function() {
+        setSnakesDiedMessage();
+    });
+
 
     socket.on('SendOppoSegments', function () {
         SendOppoSegments();

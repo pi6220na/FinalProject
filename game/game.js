@@ -94,6 +94,11 @@ function init(io) {
 
 
 
+        socket.on('sendSnakesDiedMessage', function() {
+            socket.broadcast.emit('SnakesDied');  //send out to other player
+            //socket.emit('returnOppoSegments', oppoSnakesegments);  //send out to player
+        });
+
 
 
         socket.on('snakeInPlay', function(snake){

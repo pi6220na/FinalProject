@@ -420,7 +420,7 @@
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
     var gameoverS = true;        // Game is over === set to true to stop snake from moving when initialized
     var gameoverO = true;        // Game is over === set to true to stop oppoSnake from moving when initialized
-    var roundover = false;      // when player collides with something, the round is over
+    var roundover = true;      // when player collides with something, the round is over
     var roundOverTime = 1;       // How long we have been game over
     var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
     var maxlives = 5;        // max number of lives
@@ -431,7 +431,6 @@
     var gAppleValue = 2;
     var bAppleValue = 3;
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
-    var playThisSnake = false;   // switch controls updating snake or opponent
     //var oppoSnake = {};                   // hold copy of snake
     var playerIDs = {};          // player id's of this client and opponent
     var runLoop;                 // animation variable used to turn on/off animation loop
@@ -460,7 +459,7 @@
 
         // New game
         newGame();
-        roundover = true;
+        roundover = false;   //was true
 
         // Enter main loop
         main(0);
@@ -566,7 +565,7 @@
         // Initialize variables
         //gameoverS = true;       // needed here?
         //gameoverO = true;
-        roundover = false;
+
         if (IamGreen) {
             $('.numbers').css('color', 'green');
         } else {
@@ -579,21 +578,41 @@
         $('#hDate').html(user.highDate);
         $('#hComment').html(user.comment);
 
+        console.log('');
+        console.log('%%%%%%%%%%%%%%% in newGame %%%%%%%%%%%%%%%');
+        console.log('%%%%%%%%%%%%%% roundover = ' + roundover + '   %%%%%%%%%%%%%');
+        console.log('');
 
-        /*
+
+
         // reset snake to home position if starting a new round/game
-        //if (livesLeft === 5 && IamGreen) {
-        if (IamGreen) {
+        if (roundover) {
             snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
-        }
-        //if (livesLeft === 5 && !IamGreen) {
-        if (!IamGreen) {
             oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        } else {
+            if (IamGreen) {
+                snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+                getOppoSegments();
+                drawSnakeB();
+                console.log('');
+                console.log('%%%%%%%%%%%%% IamGreen drawing blue snake %%%%%%%%%%%%');
+                console.log('');
+            }
+            if (!IamGreen) {
+                oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+                getSnakeSegments();
+                drawSnakeG();
+                console.log('');
+                console.log('%%%%%%%%%%%%% !IamGreen drawing green snake %%%%%%%%%%%%');
+                console.log('');
+            }
         }
-        */
-
+        /*
         snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
         oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
+        */
+
+        roundover = false;
 
     }
 
@@ -738,12 +757,14 @@
 
     function updateGame(dt) {       // alternate updating snakes
 
+        /*
         console.log('oooooooooooo    player count = ' + mainPlayerCount + ' ooooooooooooooooo');
         console.log('oooooooooooo    IamGreen = ' + IamGreen + ' oooooooooooooooo');
         console.log('oooooooooooo    gameOverS = ' + gameoverS + ' oooooooooooooooo');
         console.log('oooooooooooo    gameOverO = ' + gameoverO + ' oooooooooooooooo');
         console.log('oooooooooooo    updateGame snake = ' + JSON.stringify(snake));
         console.log('oooooooooooo    updateGame oppoSnake = ' + JSON.stringify(oppoSnake));
+        */
 
         if (mainPlayerCount === 2) {
             if (!gameoverS) {
@@ -866,8 +887,9 @@ function updateGameS(dt) {       // green snake, client
                         if (nx === sx && ny === sy) {
                             // Found a snake part
                             gameoverS = true;
-                            snakeCollideOppo();  // sockets call
                             snakesDied = true;
+                            snakeCollideOppo();  // sockets call
+                            sendSnakesDiedMessage();
                             break;
                         } else {
                             snakesDied = false;
@@ -1013,8 +1035,9 @@ function updateGameS(dt) {       // green snake, client
                         if (nx === sx && ny === sy) {
                             // Found a snake part
                             gameoverO = true;
-                            snakeCollideSnake();  // sockets call
                             snakesDied = true;
+                            snakeCollideSnake();  // sockets call
+                            sendSnakesDiedMessage();
                             break;
                         } else {
                             snakesDied = false;
@@ -1244,7 +1267,16 @@ function updateGameS(dt) {       // green snake, client
     }
 
     function setSnakesDiedMessage() {
-        console.log('snakeGame:    setSnakesDiedMessage() ');
+
+        // reset these to true if this is the opposing player
+        if (IamGreen) {
+            gameoverO = true;
+        } else {
+            gameoverS = true;
+        }
+        snakesDied = true;
+
+        // console.log('snakeGame:    setSnakesDiedMessage() ');
         context.fillStyle = "rgba(0, 0, 0, 0.5)";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
