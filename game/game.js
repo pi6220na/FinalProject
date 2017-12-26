@@ -48,12 +48,9 @@ function init(io) {
 
 
         socket.on('currentPosition', function(model){
-        // find player in players obj and update
         // receive snake object and pass to other player
 
-            //oppoSnake = model;                            // set opponent snake object
-
-            snake = model;                            // set opponent snake object
+            snake = model;        // set opponent snake object ... does this do anything worthwhile??? todo
 
             console.log(' ');
             //console.log('game.js: setting oppoSnake to model = ' + JSON.stringify(oppoSnake));

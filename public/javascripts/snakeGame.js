@@ -49,10 +49,12 @@
 //window.onload = function() {
 
     // keep these displays
+    // user holds high score
     console.log('inside snakeGame ... user._id = ' + user._id);
     for (item in user) {
         console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
     }
+    // logs holds the logged in user info
     for (item in logs[0]) {
         console.log('snakegame logs item = ' + item + ' logs[item] = ' + logs[0][item]);
     }
@@ -77,30 +79,20 @@
     // Get the canvas and context
     var canvas = document.getElementById("viewport");
     var context = canvas.getContext("2d");
-
     // Timing and frames per second
     var lastframe = 0;
     var fpstime = 0;
     var framecount = 0;
     var fps = 0;
-
     var initialized = false;
-
     // Images
     var imagesG = [];
     var imagesB = [];
     var tileimage;
-
-
-
     // Image loading global variables
     var loadcount = 0;
     var loadtotal = 0;
     var preloaded = false;
-
-
-//    var player = {id: null};
-
 
     // Load images
     function loadImages(imagefiles) {
@@ -313,7 +305,6 @@
 
     };
 
-
     // Snake prototype definitions
     var Snake = function() {
         this.init(0, 0, 0, 1, 5, 1);  // 5 was 10
@@ -325,13 +316,6 @@
     // Initialize the snake at a location
     Snake.prototype.init = function(id, x, y, direction, speed, numsegments) {
         this.id = id;                      // sockets id
-        /*
-        if (countPlayers === 1) {        // countPlayers set in gameSocket.js, if 1, first player of two
-            this.color = "g";           // green snake
-        } else {
-            this.color = "b";           // blue snake
-        }
-        */
         this.x = x;
         this.y = y;
         this.direction = direction; // Up, Right, Down, Left
@@ -416,7 +400,6 @@
 
     // Variables
     var score = 0;              //
-  //  var dbHighScore;              // initialize from server   TODO
     var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
     var gameoverS = true;        // Game is over === set to true to stop snake from moving when initialized
     var gameoverO = true;        // Game is over === set to true to stop oppoSnake from moving when initialized
@@ -427,22 +410,22 @@
     var livesLeft = maxlives;  // number of lives
     var gameLevel = 1;         // number of levels to play, advances after completing TODO rounds
     var sSpeed = 10;           // initial speed, bumped to 15 for level 2
+    var openValue = 0;          // snake contained in snake object, collision detection done on that object
     var wallValue = 1;          // grid values in 2 dimension array used for collision detection
     var gAppleValue = 2;
     var bAppleValue = 3;
-    var openValue = 0;          // snake contained in snake object, collision detection done on that object
-    //var oppoSnake = {};                   // hold copy of snake
     var playerIDs = {};          // player id's of this client and opponent
     var runLoop;                 // animation variable used to turn on/off animation loop
     var mainPlayerCount;           // set in gameSocket.js 1 = first player = green snake, 2 = second = blue
-    var IamGreen = false;
+    var IamGreen = false;        // main identifier of snake type - green:snake or blue:oppoSnake
+                                 // if IamGreen is true, then "this" client browser has the green snake
     var saveSnakeID;
     var saveoppoSnakeID;
-    var passSnake = new Snake();
-    var passOppoSnake = new Snake();
-    var oppoSnakeSegments = [];          // passed from opposing client, used to check for snake/snake collision
-    var snakeSegments = [];
-    var snakesDied = false;
+    var passSnake = new Snake();    // passed from other client, used for painting the other snake in client window
+    var passOppoSnake = new Snake(); // ditto
+    var oppoSnakeSegments = [];       // passed from opposing client, used to check for snake/snake collision
+    var snakeSegments = [];             // ditto
+    var snakesDied = false;         // indicates a collision between snakes, game over for both players
 
     // Initialize the game
     function init() {
@@ -497,19 +480,6 @@
             newGame();
             roundover = false;
 
-            //gameoverS = true;
-            //gameoverO = true;
-
-            // see key listener for setting of gameover boolean
-            /*
-            if (IamGreen) {
-                gameoverS = false;          //testing this location
-            }
-            if (!IamGreen) {
-                gameoverO = false;          //testing this location
-            }
-            */
-
             $('#scorethis').html("000");
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
@@ -528,14 +498,7 @@
         }
     }
 
-    // called from gameSocket.js when opponent snake received
-    // determine if game loop running. if not, start it up
-//    function checkGameState() {
-//        if (gameoverS || gameoverO) {                       //gameover note need to determine S or O
-//            tryNewGame();
-//        }
-//    }
-
+    // called from gameSocket.js - passes in opposition snake object to be moved
     function setOppoSnake(snk) {
 
         //oppoSnake = snk;
@@ -583,9 +546,7 @@
         console.log('%%%%%%%%%%%%%% roundover = ' + roundover + '   %%%%%%%%%%%%%');
         console.log('');
 
-
-
-        // reset snake to home position if starting a new round/game
+        // reset snakes to home position if starting a new round/game
         if (roundover) {
             snake.init(saveSnakeID, 5, 10, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
             oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
@@ -686,7 +647,7 @@
     // Main loop
     function main(tframe) {
         // Request animation frames
-        runLoop = window.requestAnimationFrame(main);     // this get executed over and over
+        runLoop = window.requestAnimationFrame(main);     // this get executed over and over a bazillion times/second
 
         if (!initialized) {
             // Preloader
@@ -712,9 +673,7 @@
                 initialized = true;
             }
 
-
         } else {
-
 
             // Update and render the game
             update(tframe);
@@ -755,7 +714,7 @@
     }
 
 
-    function updateGame(dt) {       // alternate updating snakes
+    function updateGame(dt) {
 
         /*
         console.log('oooooooooooo    player count = ' + mainPlayerCount + ' ooooooooooooooooo');
@@ -768,13 +727,9 @@
 
         if (mainPlayerCount === 2) {
             if (!gameoverS) {
-                // send message to opponent
-                //sendSnakeInPlay(snake);
                 updateGameS(dt);
-
             }
             if (!gameoverO) {
-                //sendOppoSnakeInPlay(oppoSnake);
                 updateGameO(dt);
             }
         } else {
@@ -783,54 +738,7 @@
 
     }
 
-    function snakeInPlay(snakeIn) {
-        // have to recreate snake to pick up prototype methods that get dropped by sockets.io
-        console.log('entering snakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
-
-        passSnake = new Snake();
-
-        passSnake.id = snakeIn.id;
-        passSnake.x = snakeIn.x;
-        passSnake.y = snakeIn.y;
-        passSnake.direction = snakeIn.direction;
-        passSnake.speed = snakeIn.speed;
-        passSnake.movedelay = snakeIn.movedelay;
-        passSnake.segments = snakeIn.segments.slice(0);
-        //for (item in passSnake) {
-        //    console.log('item = ' + item + ' passSnake[item] = ' + passSnake[item]);
-        //}
-
-        //var snake = Object.assign( {}, passSnake);
-        snake = passSnake;
-        snake.move();
-
-    }
-
-     function oppoSnakeInPlay(snakeIn) {
-         // have to recreate snake to pick up prototype methods that get dropped by sockets.io
-         console.log('entering oppoSnakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
-
-         passOppoSnake = new Snake();
-
-         passOppoSnake.id = snakeIn.id;
-         passOppoSnake.x = snakeIn.x;
-         passOppoSnake.y = snakeIn.y;
-         passOppoSnake.direction = snakeIn.direction;
-         passOppoSnake.speed = snakeIn.speed;
-         passOppoSnake.movedelay = snakeIn.movedelay;
-         passOppoSnake.segments = snakeIn.segments.slice(0);
-         //for (item in passOppoSnake) {
-         //    console.log('item = ' + item + ' passOppoSnake[item] = ' + passOppoSnake[item]);
-         //}
-
-         //var oppoSnake = Object.assign({}, passOppoSnake);
-         oppoSnake = passOppoSnake;
-         oppoSnake.move();
-
-    }
-
-
-function updateGameS(dt) {       // green snake, client
+    function updateGameS(dt) {       // green snake, client
 
     //alternate player snake with opponent snake for the following functions
 
@@ -848,12 +756,6 @@ function updateGameS(dt) {       // green snake, client
             var nextmove = snake.nextMove();
             var nx = nextmove.x;
             var ny = nextmove.y;
-
-            console.log('$$$$$$$$$$$    nx = ' + nx);
-            console.log('$$$$$$$$$$$    ny = ' + ny);
-            console.log('$$$$$$$$$$$    snake.x = ' + snake.x);
-            console.log('$$$$$$$$$$$    snake.y = ' + snake.y);
-
 
             if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {  // outer walls
                 if (level.tiles[nx][ny] === wallValue) {
@@ -963,9 +865,6 @@ function updateGameS(dt) {       // green snake, client
                 // Out of bounds
                 gameoverS = true;
 
-                // send sockets message?
-
-
             }
 
             if (gameoverS) {
@@ -989,7 +888,6 @@ function updateGameS(dt) {       // green snake, client
             }
         }
     }
-
 
 
     function updateGameO(dt) {           // blue snake, opponent
@@ -1115,7 +1013,6 @@ function updateGameS(dt) {       // green snake, client
                 // Out of bounds
                 gameoverO = true;
 
-                // send sockets message?
             }
 
             if (gameoverO) {
@@ -1203,6 +1100,53 @@ function updateGameS(dt) {       // green snake, client
     function oppoSnakeEatApple(id) {
         console.log('oppoSnake ate apple');
         socket.emit('oppoSnakeAteApple', id);
+    }
+
+
+    // called from opposition client to move this snake
+    function snakeInPlay(snakeIn) {
+        // have to recreate snake to pick up prototype methods that get dropped by sockets.io
+        console.log('entering snakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
+
+        passSnake = new Snake();
+
+        passSnake.id = snakeIn.id;
+        passSnake.x = snakeIn.x;
+        passSnake.y = snakeIn.y;
+        passSnake.direction = snakeIn.direction;
+        passSnake.speed = snakeIn.speed;
+        passSnake.movedelay = snakeIn.movedelay;
+        passSnake.segments = snakeIn.segments.slice(0);
+        //for (item in passSnake) {
+        //    console.log('item = ' + item + ' passSnake[item] = ' + passSnake[item]);
+        //}
+
+        //var snake = Object.assign( {}, passSnake);
+        snake = passSnake;
+        snake.move();
+
+    }
+
+    // called from opposition client to move this oppoSnake
+    function oppoSnakeInPlay(snakeIn) {
+        // have to recreate snake to pick up prototype methods that get dropped by sockets.io
+        console.log('entering oppoSnakeInPlay snakeIn = ' + JSON.stringify(snakeIn));
+        passOppoSnake = new Snake();
+        passOppoSnake.id = snakeIn.id;
+        passOppoSnake.x = snakeIn.x;
+        passOppoSnake.y = snakeIn.y;
+        passOppoSnake.direction = snakeIn.direction;
+        passOppoSnake.speed = snakeIn.speed;
+        passOppoSnake.movedelay = snakeIn.movedelay;
+        passOppoSnake.segments = snakeIn.segments.slice(0);
+        //for (item in passOppoSnake) {
+        //    console.log('item = ' + item + ' passOppoSnake[item] = ' + passOppoSnake[item]);
+        //}
+
+        //var oppoSnake = Object.assign({}, passOppoSnake);
+        oppoSnake = passOppoSnake;
+        oppoSnake.move();
+
     }
 
 
@@ -1716,7 +1660,7 @@ function updateGameS(dt) {       // green snake, client
     }
     */
 
-    console.log('maybe fell through to bottom of code, call init()');
+    console.log('fell through to bottom of code, call init()');
     // Call init to start the game
     init();
 
