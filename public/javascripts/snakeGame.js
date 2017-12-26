@@ -844,12 +844,16 @@ function updateGameS(dt) {       // green snake, client
         // Move the snake
         if (snake.tryMove(dt)) {
 
-            // Check snake collisions
-
             // Get the coordinates of the next move
             var nextmove = snake.nextMove();
             var nx = nextmove.x;
             var ny = nextmove.y;
+
+            console.log('$$$$$$$$$$$    nx = ' + nx);
+            console.log('$$$$$$$$$$$    ny = ' + ny);
+            console.log('$$$$$$$$$$$    snake.x = ' + snake.x);
+            console.log('$$$$$$$$$$$    snake.y = ' + snake.y);
+
 
             if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {  // outer walls
                 if (level.tiles[nx][ny] === wallValue) {
@@ -861,44 +865,51 @@ function updateGameS(dt) {       // green snake, client
                 // sockets add call to server to notify players of collision
 
                 // Collisions with the snake itself
-                for (var i=0; i<snake.segments.length; i++) {
-                    var sx = snake.segments[i].x;
-                    var sy = snake.segments[i].y;
-
-                    if (nx === sx && ny === sy) {
-                        // Found a snake part
-                        gameoverS = true;
-                        snakeCollideSelf(snake.id);  // sockets call
-                        break;
-                    }
-                }
-
-                if (mainPlayerCount > 1) {
-                    console.log('snakeGame: calling getOppoSegments() from updateGameS');
-                    getOppoSegments();
-
-                    // Collisions with oppo snake
-                    console.log('snakeGame: oppoSnakeSeqments = ' + oppoSnakeSegments);
-                    console.log('snakeGame: oppoSnakeSeqments.length = ' + oppoSnakeSegments.length);
-                    for (var i = 0; i < oppoSnakeSegments.length; i++) {
-                        var sx = oppoSnakeSegments[i].x;
-                        var sy = oppoSnakeSegments[i].y;
+                if (!gameoverS) {
+                    for (var i = 0; i < snake.segments.length; i++) {
+                        var sx = snake.segments[i].x;
+                        var sy = snake.segments[i].y;
 
                         if (nx === sx && ny === sy) {
                             // Found a snake part
                             gameoverS = true;
-                            snakesDied = true;
-                            snakeCollideOppo();  // sockets call
-                            sendSnakesDiedMessage();
+                            snakeCollideSelf(snake.id);  // sockets call
                             break;
-                        } else {
-                            snakesDied = false;
+                        }
+                    }
+                }
+
+                if (!gameoverS) {
+                    if (mainPlayerCount > 1) {
+                        console.log('snakeGame: calling getOppoSegments() from updateGameS');
+                        getOppoSegments();
+
+                        // Collisions with oppo snake
+                        console.log('snakeGame: oppoSnakeSeqments = ' + oppoSnakeSegments);
+                        console.log('snakeGame: oppoSnakeSeqments.length = ' + oppoSnakeSegments.length);
+                        for (var i = 0; i < oppoSnakeSegments.length; i++) {
+                            var sx = oppoSnakeSegments[i].x;
+                            var sy = oppoSnakeSegments[i].y;
+
+                            if (nx === sx && ny === sy) {
+                                // Found a snake part
+                                gameoverS = true;
+                                snakesDied = true;
+                                snakeCollideOppo();  // sockets call
+                                sendSnakesDiedMessage();
+                                break;
+                            } else {
+                                snakesDied = false;
+                            }
                         }
                     }
                 }
 
                 if (!gameoverS) {
                     // The snake is allowed to move
+
+                    //new location to before snake.move();  this fixes off by one position error
+                    sendSnakeInPlay(snake);
 
                     // Move the snake
                     snake.move();
@@ -944,9 +955,8 @@ function updateGameS(dt) {       // green snake, client
                     console.log('((((((((( ________________________ ))))))))))))))))');
                     // Sockets send player's new position to the server.
                     sendPosition(snake);
-
 */
-                    sendSnakeInPlay(snake);
+                    // was here sendSnakeInPlay(snake);
 
                 }
             } else {
@@ -992,8 +1002,6 @@ function updateGameS(dt) {       // green snake, client
         // Move the snake
         if (oppoSnake.tryMove(dt)) {
 
-            // Check snake collisions
-
             // Get the coordinates of the next move
             var nextmove = oppoSnake.nextMove();
             var nx = nextmove.x;
@@ -1009,46 +1017,51 @@ function updateGameS(dt) {       // green snake, client
                 // sockets add call to server to notify players of collision
 
                 // Collisions with the snake itself
-                for (var i=0; i<oppoSnake.segments.length; i++) {
-                    var sx = oppoSnake.segments[i].x;
-                    var sy = oppoSnake.segments[i].y;
-
-                    if (nx === sx && ny === sy) {
-                        // Found a snake part
-                        gameoverO = true;
-                        oppoSnakeCollideSelf(oppoSnake.id);  // sockets call
-                        break;
-                    }
-                }
-
-                if (mainPlayerCount > 1) {
-                    console.log('snakeGame: calling getSnakeSegments() from updateGameO');
-                    getSnakeSegments();
-
-                    // Collisions with snake
-                    console.log('snakeGame: snakeSeqments = ' + snakeSegments);
-                    console.log('snakeGame: snakeSeqments.length = ' + snakeSegments.length);
-                    for (var i = 0; i < snakeSegments.length; i++) {
-                        var sx = snakeSegments[i].x;
-                        var sy = snakeSegments[i].y;
+                if (!gameoverO) {
+                    for (var i = 0; i < oppoSnake.segments.length; i++) {
+                        var sx = oppoSnake.segments[i].x;
+                        var sy = oppoSnake.segments[i].y;
 
                         if (nx === sx && ny === sy) {
                             // Found a snake part
                             gameoverO = true;
-                            snakesDied = true;
-                            snakeCollideSnake();  // sockets call
-                            sendSnakesDiedMessage();
+                            oppoSnakeCollideSelf(oppoSnake.id);  // sockets call
                             break;
-                        } else {
-                            snakesDied = false;
                         }
                     }
                 }
 
+                if (!gameoverO) {
+                    if (mainPlayerCount > 1) {
+                        console.log('snakeGame: calling getSnakeSegments() from updateGameO');
+                        getSnakeSegments();
 
+                        // Collisions with snake
+                        console.log('snakeGame: snakeSeqments = ' + snakeSegments);
+                        console.log('snakeGame: snakeSeqments.length = ' + snakeSegments.length);
+                        for (var i = 0; i < snakeSegments.length; i++) {
+                            var sx = snakeSegments[i].x;
+                            var sy = snakeSegments[i].y;
+
+                            if (nx === sx && ny === sy) {
+                                // Found a snake part
+                                gameoverO = true;
+                                snakesDied = true;
+                                snakeCollideSnake();  // sockets call
+                                sendSnakesDiedMessage();
+                                break;
+                            } else {
+                                snakesDied = false;
+                            }
+                        }
+                    }
+                }
 
                 if (!gameoverO) {
                     // The snake is allowed to move
+
+                    // new location before oppoSnake.move();  this fixes off by one position error
+                    sendOppoSnakeInPlay(oppoSnake);
 
                     // Move the snake
                     oppoSnake.move();
@@ -1095,7 +1108,7 @@ function updateGameS(dt) {       // green snake, client
                     // Sockets send player's new position to the server.
                     sendPosition(oppoSnake);
 */
-                    sendOppoSnakeInPlay(oppoSnake);
+                    // was here sendOppoSnakeInPlay(oppoSnake);
 
                 }
             } else {
@@ -1103,8 +1116,6 @@ function updateGameS(dt) {       // green snake, client
                 gameoverO = true;
 
                 // send sockets message?
-
-
             }
 
             if (gameoverO) {
@@ -1202,6 +1213,7 @@ function updateGameS(dt) {       // green snake, client
 
     function setOppoSnakeGameOver() {
         gameoverO = true;
+
     }
 
     // slows down speed of snake? Both fpstime and framecount are not used... ? must be for future release original code ?
@@ -1426,6 +1438,7 @@ function updateGameS(dt) {       // green snake, client
 
         //console.log('drawSnakeG: snake = ' + JSON.stringify(snake));
 
+
         for (var i=0; i<snake.segments.length; i++) {
             var segment = snake.segments[i];
             var segx = segment.x;
@@ -1508,7 +1521,6 @@ function updateGameS(dt) {       // green snake, client
         // Loop over every snake segment
 
         //console.log('drawSnakeB: oppoSnake = ' + JSON.stringify(oppoSnake));
-
 
         for (var i=0; i<oppoSnake.segments.length; i++) {
             var segment = oppoSnake.segments[i];
