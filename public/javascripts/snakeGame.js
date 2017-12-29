@@ -502,16 +502,21 @@
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
 
-            $('#highestscore').html(user.highScore);
-            if (user.highDate === !null && user.highDate === !undefined) {
-                $('#hDate').html(user.highDate.substr(0, 10));
+
+            if (user.highDate === null || user.highDate === undefined) {
+                user.highDate = new Date().toDateString();
             }
+            if (logs[0].highDate === null || logs[0].highDate === undefined) {
+                logs[0].highDate = new Date().toDateString();
+            }
+
+
+            $('#highestscore').html(user.highScore);
+            $('#hDate').html(user.highDate.substr(0, 10));
             $('#hUser').html(user.local.username);
 
             $('#highestuserscore').html(logs[0].highScore);
-            if (user.highDate === !null && user.highDate === !undefined) {
-                $('#hdate').html(logs[0].highDate.substr(0, 10));
-            }
+            $('#hdate').html(logs[0].highDate.substr(0, 10));
             $('#huser').html(logs[0].local.username);
             $('#huser1').html(logs[0].local.username);
 
@@ -552,16 +557,21 @@
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
 
-        $('#highestscore').html(user.highScore);
-        if (user.highDate === !null && user.highDate === !undefined) {
-            $('#hDate').html(user.highDate.substr(0, 10));
+
+        if (user.highDate === null || user.highDate === undefined) {
+            user.highDate = new Date().toDateString();
         }
+        if (logs[0].highDate === null || logs[0].highDate === undefined) {
+            logs[0].highDate = new Date().toDateString();
+        }
+
+
+        $('#highestscore').html(user.highScore);
+        $('#hDate').html(user.highDate.substr(0, 10));
         $('#hUser').html(user.local.username);
 
         $('#highestuserscore').html(logs[0].highScore);
-        if (user.highDate === !null && user.highDate === !undefined) {
-            $('#hdate').html(logs[0].highDate.substr(0, 10));
-        }
+        $('#hdate').html(logs[0].highDate.substr(0, 10));
         $('#huser').html(logs[0].local.username);
         $('#huser1').html(logs[0].local.username);
 
@@ -1325,8 +1335,10 @@
 
             user.highScore = passed_user.highScore;
             user.highDate = passed_user.highDate;
+            user.local.username = passed_user.local.username;
             logs[0].highScore = passed_logs[0].highScore;
             logs[0].highDate = passed_logs[0].highDate;
+            logs[0].local.username = passed_logs[0].local.username;
 
             /*
             console.log('')
@@ -1338,17 +1350,20 @@
             console.log('logs[0].highScore = ' + logs[0].highScore);
             console.log('logs[0].highDate = ' + logs[0].highDate);
             */
+            if (user.highDate === null || user.highDate === undefined) {
+                user.highDate = new Date().toDateString();
+            }
+            if (logs[0].highDate === null || logs[0].highDate === undefined) {
+                logs[0].highDate = new Date().toDateString();
+            }
+
 
             $('#highestscore').html(user.highScore);
-            if (user.highDate === !null && user.highDate === !undefined) {
-                $('#hDate').html(user.highDate.substr(0, 10));
-            }
+            $('#hDate').html(user.highDate.substr(0, 10));
             $('#hUser').html(user.local.username);
 
             $('#highestuserscore').html(logs[0].highScore);
-            if (user.highDate === !null && user.highDate === !undefined) {
-                $('#hdate').html(logs[0].highDate.substr(0, 10));
-            }
+            $('#hdate').html(logs[0].highDate.substr(0, 10));
             $('#huser').html(logs[0].local.username);
             $('#huser1').html(logs[0].local.username);
 
