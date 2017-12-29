@@ -22,6 +22,7 @@ router.get('/', isLoggedIn, function(req, res, next) {
         .then( (logs) => {
             for (item in logs) {
                 console.log('logs item = ' + item + ' logs[item] = ' + logs[item]);
+            }
 
                 User.findOne().select( { highScore: -1, highDate: -1, comment: -1, local: -1 } ).sort( { highScore: -1 } )
                     .then( (docs) => {
@@ -31,28 +32,9 @@ router.get('/', isLoggedIn, function(req, res, next) {
                     next(err)
                 });
 
-
-            }}).catch( (err) => {
+            }).catch( (err) => {
                 next(err)
     });
-
-
-
-
-/*
-    //Logic to update the item
-    User.update({ _id: ObjectID(_id) }, { $set : { highScore: req.body.highScore, highDate: req.body.highDate, comment: req.body.comment }})
-        .then((result) => {
-
-    // code example from birdsighting
-    Bird.find()//.select( { name: 1  } ).sort( { name: 1 } )
-        .then( ( docs ) => {
-            console.log(docs);  // not required, but useful to see what is returned
-            res.render('index', { title: 'All Birds', birds: docs });
-        }).catch( (err) => {
-        next(err)
-    });
-*/
 
 });
 
@@ -106,27 +88,18 @@ router.get('/logout', function(req, res, next) {
 /* POST update */
 router.post('/update', function(req, res, next) {
 
-
-    //var _id = User._id;
-
-    // use form data to make a new Bird; save to DB
-    // var user = User(req.body);
-
     for (item in req.body) {
         console.log('/update in gameinfo.js body first item = ' + item + ' -> ' + req.body[item]);
     }
 
     console.log('id = ' + req.body._id);
-
     console.log('highScore = ' + req.body.highScore);
     console.log('highDate = ' + req.body.highDate);
-    console.log('comment = ' + req.body.comment);
 
-    //var hold_id = id;
 
     var hold_highScore = req.body.highScore;
     var hold_highDate = req.body.highDate;
-    var hold_comment = req.body.comment;
+
 
     //Logic to find existing user highscore on database
     //User.update({ _id: ObjectID(_id) }, { $set : { username:req.body.username, highScore: req.body.highScore, highDate: req.body.highDate, comment: req.body.comment }})
@@ -138,33 +111,22 @@ router.post('/update', function(req, res, next) {
             console.log('docs = ' + docs);
             console.log('req.user = ' + JSON.stringify(req.user));
 
-
             if (docs) {  // was result
-
 
                 console.log('req.user.highScore = ' + req.user.highScore + ' hold_highScore = ' + hold_highScore);
                 if (hold_highScore > req.user.highScore || req.user.highScore === undefined) {
 
                     //Logic to update the item                    //username:req.body.username,
-                    User.update({ _id: ObjectID(req.body._id) }, { $set : {  highScore: req.body.highScore, highDate: req.body.highDate, comment: req.body.comment }})
-                    //User.update({
-                    //    highScore: req.body.highScore,
-                    //    highDate: req.body.highDate,
-                    //    comment: req.body.comment
-                    //})
-
+                    User.update({ _id: ObjectID(req.body._id) }, { $set : {  highScore: req.body.highScore, highDate: req.body.highDate }})
                         .then((result) => {
-
+                            /*
                             for (item in result) {
-
                                 console.log('item = ' + item + " " + result[item]);
                             }
                             for (item in req.body) {
-
                                 console.log('item = ' + item + " " + req.body[item]);
                             }
-
-
+                            */
                             if (result.ok) {
                                 console.log('gameinfo.js update ok');
                                 res.render('index');
@@ -180,8 +142,6 @@ router.post('/update', function(req, res, next) {
                         });
                 }
 
-
-
             } else {
                 // The task was not found. Report 404 error.
                 var notFound = Error('Document not found for findOne');
@@ -193,22 +153,34 @@ router.post('/update', function(req, res, next) {
             }
 
         });
-        /*
-        .catch((err) => {
-            next(err);
-        });
-        */
-/*
-    for (item in myDocument.mongooseCollection) {
-        console.log('/update findOne in gameinfo.js myDocument.mongooseCollection item = ' + item + ' -> ' + myDocument.mongooseCollection[item]);
-    }
-    console.log('myDocument in JSON = ' + JSON.stringify(myDocument));
-*/
-
-
 
 });
 
+
+router.get('/reload', function(req, res, next) {
+
+    console.log('in /reload ... req.user.local.username = ' + req.user.local.username);
+
+    User.find( {'local.username':req.user.local.username} )
+        .then( (logs) => {
+            for (item in logs) {
+                console.log('logs item = ' + item + ' logs[item] = ' + logs[item]);
+            }
+
+            User.findOne().select( { highScore: -1, highDate: -1, comment: -1, local: -1 } ).sort( { highScore: -1 } )
+                .then( (docs) => {
+                    console.log('in /reload: docs = ' + docs + ' logs = ' + logs);
+                    //res.render('index', { user : JSON.stringify(docs), logs: JSON.stringify(logs) });  // was req.user
+                    res.send({ user : JSON.stringify(docs), logs: JSON.stringify(logs) });
+                }).catch( (err) => {
+                next(err)
+            });
+
+            }).catch( (err) => {
+        next(err)
+    });
+
+});
 
 
 

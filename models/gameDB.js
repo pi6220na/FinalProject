@@ -8,12 +8,8 @@ var userSchema = new Schema( {
         username: String,
         password: String
     },
-
-
         highScore : { type: Number },
-        highDate : { type: Date },
-        comment : { type: String }
-
+        highDate : { type: Date }
 });
 
 

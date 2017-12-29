@@ -51,6 +51,21 @@
     // keep these displays
     // user holds high score
     console.log('inside snakeGame ... user._id = ' + user._id);
+
+    //var d = user.highDate;
+    //var n = d.toString();
+
+    if (user.highDate === !null && user.highDate === !undefined) {
+        console.log('user high date type of = ' + typeof user.highDate);
+
+        //thisDate.substr(0, 10)
+        console.log('substr date string = ' + user.highDate.substr(0, 10));
+    }
+    console.log('user high date = ' + user.highDate);
+    console.log('user high score = ' + user.highScore);
+    console.log('user name = ' + user.local.username);
+
+/*
     for (item in user) {
         console.log('snakegame item = ' + item + ' user[item] = ' + user[item]);
     }
@@ -58,15 +73,13 @@
     for (item in logs[0]) {
         console.log('snakegame logs item = ' + item + ' logs[item] = ' + logs[0][item]);
     }
-    //console.log('logs[0][_id] = ' + logs[0][_id]);
     console.log('logs = ' + JSON.stringify(logs));
+*/
 
     console.log('logs id = ' + logs[0]._id);
-
-    console.log('inside snakeGame ... user[local] = ' + user.local.username);
-    console.log(user.highScore);
-    //console.log(user.local.username);
-
+    console.log('logs high date = ' + logs[0].highDate);
+    console.log('logs high score = ' + logs[0].highScore);
+    console.log('logs user name = ' + logs[0].local.username);
 
 // https://stackoverflow.com/questions/8916620/disable-arrow-key-scrolling-in-users-browser
     window.addEventListener("keydown", function(e) {
@@ -430,8 +443,8 @@
     // Initialize the game
     function init() {
         // Load images
-        imagesG = loadImages(["./images/snake-graphics green apple.png"]);
-        imagesB = loadImages(["./images/snake-graphics blue apple.png"]);
+        imagesG = loadImages(["./images/snake-green fruits.png"]);
+        imagesB = loadImages(["./images/snake-blue.png"]);
         /*
         // Add mouse events
         canvas.addEventListener("mousedown", onMouseDown);
@@ -448,7 +461,7 @@
         main(0);
     }
 
-    // called from
+    // called from gameSocket.js when first player logs into game
     function setColorValue(countPlayers) {
         if (countPlayers === 1) {
             IamGreen = true;
@@ -456,6 +469,11 @@
         }
         mainPlayerCount = countPlayers;
         console.log('mainPlayerCount and countPlayers (from sockets:) = ' + mainPlayerCount);
+        if (IamGreen) {
+            $('.numbers').css('color', 'green');
+        } else {
+            $('.numbers').css('color', 'blue');
+        }
     }
 
     // Check if we can start a new game
@@ -483,15 +501,19 @@
             $('#scorethis').html("000");
             $('#gameLevel').html(gameLevel);
             $('#speed').html(sSpeed);
-            $('#highestscore').html(user.highScore);
-            $('#hDate').html(user.highDate);
-            $('#hComment').html(user.comment);
-            if (IamGreen) {
-                $('.numbers').css('color', 'green');
-            } else {
-                $('.numbers').css('color', 'blue');
-            }
 
+            $('#highestscore').html(user.highScore);
+            if (user.highDate === !null && user.highDate === !undefined) {
+                $('#hDate').html(user.highDate.substr(0, 10));
+            }
+            $('#hUser').html(user.local.username);
+
+            $('#highestuserscore').html(logs[0].highScore);
+            if (user.highDate === !null && user.highDate === !undefined) {
+                $('#hdate').html(logs[0].highDate.substr(0, 10));
+            }
+            $('#huser').html(logs[0].local.username);
+            $('#huser1').html(logs[0].local.username);
 
             // Request animation frames
             // runLoop = window.requestAnimationFrame(main);     // this get executed over and over
@@ -500,9 +522,6 @@
 
     // called from gameSocket.js - passes in opposition snake object to be moved
     function setOppoSnake(snk) {
-
-        //oppoSnake = snk;
-        //console.log('&&&&&&&&&&&&    setOppoSnake = ' + JSON.stringify(oppoSnake) + '    &&&&&&&&&&&&&&&&&&&&');
 
         if (IamGreen) {
             snake = snk;
@@ -529,17 +548,22 @@
         //gameoverS = true;       // needed here?
         //gameoverO = true;
 
-        if (IamGreen) {
-            $('.numbers').css('color', 'green');
-        } else {
-            $('.numbers').css('color', 'blue');
-        }
         $('#scorethis').html("000");
         $('#lives').html(livesLeft);  // setup new game with total number of lives available
         $('#gameLevel').html(gameLevel);
+
         $('#highestscore').html(user.highScore);
-        $('#hDate').html(user.highDate);
-        $('#hComment').html(user.comment);
+        if (user.highDate === !null && user.highDate === !undefined) {
+            $('#hDate').html(user.highDate.substr(0, 10));
+        }
+        $('#hUser').html(user.local.username);
+
+        $('#highestuserscore').html(logs[0].highScore);
+        if (user.highDate === !null && user.highDate === !undefined) {
+            $('#hdate').html(logs[0].highDate.substr(0, 10));
+        }
+        $('#huser').html(logs[0].local.username);
+        $('#huser1').html(logs[0].local.username);
 
         console.log('');
         console.log('%%%%%%%%%%%%%%% in newGame %%%%%%%%%%%%%%%');
@@ -726,10 +750,10 @@
         */
 
         if (mainPlayerCount === 2) {
-            if (!gameoverS) {
+            if (!gameoverS && IamGreen) {
                 updateGameS(dt);
             }
-            if (!gameoverO) {
+            if (!gameoverO && !IamGreen) {
                 updateGameO(dt);
             }
         } else {
@@ -1250,19 +1274,19 @@
 
 
     function updateDatabase (HighScore) {
-
-                // logs[0][item]
-        console.log('in updateDatabase logs._id = ' + logs[0]._id);
+        //console.log('in updateDatabase logs._id = ' + logs[0]._id);
         //console.log('in updateDatabase user.local = ' + user.local);
         //console.log(' in updateDatabase highScore = ' + HighScore);
+
+        // this first ajax method updates the database with the new high score for the player
         $.ajax({
             method: "POST",
             url: "/update",
-            //data: { highScore: HighScore, username: user.local.username, highDate: Date.now(), comment: "placeholder" }
-            data: { _id: logs[0]._id, highScore: HighScore, highDate: Date.now(), comment: "placeholder" }
-        }).done (function(data) {
+            //data: { _id: logs[0]._id, highScore: HighScore, highDate: Date.now() }
+            data: { _id: logs[0]._id, highScore: HighScore, highDate: new Date() }
+        }).done (function(msg) {
             console.log('ajax success');
-            //console.log('ajax success' + data);
+            //console.log('ajax success' + msg);
             //for (item in data) {
             //    console.log('snakegame item = ' + item + ' data[item] = ' + data[item]);
            // }
@@ -1273,17 +1297,68 @@
            }
         });
 
+        var passed_user = {};
+        var passed_logs = {};
 
-        // $('#highestscore').html(HighScore);
-        // post to index.hbs file the fields we just updated to the database
-        /*
-        $('#highestscore').html(HighScore);
-        $('#hDate').html(Date.now());
-        $('#hComment').html("update");
-        */
-        $('#highestscore').html(HighScore);
-        $('#hDate').html(Date.now());
-        $('#hComment').html("a comment");
+        // this ajax method gets the new highest score on the database as well as the player's highest score
+        $.ajax({
+            method: "GET",
+            url: "/reload",
+            //data: { _id: logs[0]._id, highScore: HighScore, highDate: new Date() }
+            }).done (function(msg) {
+
+            // all these variable manipulations done here within the ajax method to do the asynchronous delay
+            // in response back from the database. javascript will zoom ahead of the db returning data thus
+            // making the html updates meaningless. putting the html updates here forces the code to update within
+            // the callback.
+            console.log('ajax second success');
+            //console.log('ajax second success' + msg);
+            //for (item in msg) {
+            //    console.log('snakegame msg = ' + item + ' msg[item] = ' + msg[item]);
+            //}
+            passed_user = JSON.parse(msg.user);
+            passed_logs = JSON.parse(msg.logs);  // logs is returned as an object within an array
+            var rv = {};
+            for (var i = 0; i < passed_logs.length; ++i) {
+                rv[i] = passed_logs[i];
+            }
+
+            user.highScore = passed_user.highScore;
+            user.highDate = passed_user.highDate;
+            logs[0].highScore = passed_logs[0].highScore;
+            logs[0].highDate = passed_logs[0].highDate;
+
+            /*
+            console.log('')
+            console.log('passed_logs.highScore = ' + logs[0].highScore);
+            console.log('passed_logs.highDate = ' + logs[0].highDate);
+            console.log('');
+            console.log('user.highScore = ' + user.highScore);
+            console.log('user.highDate = ' + user.highDate);
+            console.log('logs[0].highScore = ' + logs[0].highScore);
+            console.log('logs[0].highDate = ' + logs[0].highDate);
+            */
+
+            $('#highestscore').html(user.highScore);
+            if (user.highDate === !null && user.highDate === !undefined) {
+                $('#hDate').html(user.highDate.substr(0, 10));
+            }
+            $('#hUser').html(user.local.username);
+
+            $('#highestuserscore').html(logs[0].highScore);
+            if (user.highDate === !null && user.highDate === !undefined) {
+                $('#hdate').html(logs[0].highDate.substr(0, 10));
+            }
+            $('#huser').html(logs[0].local.username);
+            $('#huser1').html(logs[0].local.username);
+
+
+        }).fail(function (xhr) {
+            console.log("ajax second Post error:");
+            for (item in xhr) {
+                console.log(xhr[item]);
+            }
+        });
 
         console.log('leaving updateDatabase');
     }
