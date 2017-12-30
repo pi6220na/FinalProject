@@ -1311,10 +1311,12 @@
         var passed_logs = {};
 
         // this ajax method gets the new highest score on the database as well as the player's highest score
+
+        console.log('about to call /reload, username = ' + logs[0].local.username);
         $.ajax({
-            method: "GET",
+            method: "POST",
             url: "/reload",
-            //data: { _id: logs[0]._id, highScore: HighScore, highDate: new Date() }
+            data: { username: logs[0].local.username }
             }).done (function(msg) {
 
             // all these variable manipulations done here within the ajax method to do the asynchronous delay
@@ -1333,6 +1335,11 @@
                 rv[i] = passed_logs[i];
             }
 
+            console.log('');
+            console.log('passed_user = ' + JSON.stringify(passed_user));
+            console.log('passed_logs = ' + JSON.stringify(passed_logs));
+
+
             user.highScore = passed_user.highScore;
             user.highDate = passed_user.highDate;
             user.local.username = passed_user.local.username;
@@ -1340,7 +1347,7 @@
             logs[0].highDate = passed_logs[0].highDate;
             logs[0].local.username = passed_logs[0].local.username;
 
-            /*
+
             console.log('')
             console.log('passed_logs.highScore = ' + logs[0].highScore);
             console.log('passed_logs.highDate = ' + logs[0].highDate);
@@ -1349,7 +1356,7 @@
             console.log('user.highDate = ' + user.highDate);
             console.log('logs[0].highScore = ' + logs[0].highScore);
             console.log('logs[0].highDate = ' + logs[0].highDate);
-            */
+
             if (user.highDate === null || user.highDate === undefined) {
                 user.highDate = new Date().toDateString();
             }

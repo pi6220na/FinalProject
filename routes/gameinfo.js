@@ -157,11 +157,16 @@ router.post('/update', function(req, res, next) {
 });
 
 
-router.get('/reload', function(req, res, next) {
+router.post('/reload', function(req, res, next) {
 
-    console.log('in /reload ... req.user.local.username = ' + req.user.local.username);
+    //console.log('in /reload ... req.user.local.username = ' + req.user.local.username);
+    console.log('in /reload ... username = ' + req.body.username);
+    for (item in req.body) {
+        console.log('item = ' + item + ' req.body[item] = ' + req.body[item]);
+    }
 
-    User.find( {'local.username':req.user.local.username} )
+
+    User.find( {'local.username':req.body.username} )
         .then( (logs) => {
             for (item in logs) {
                 console.log('logs item = ' + item + ' logs[item] = ' + logs[item]);
