@@ -172,7 +172,8 @@ router.post('/reload', function(req, res, next) {
                 console.log('logs item = ' + item + ' logs[item] = ' + logs[item]);
             }
 
-            User.findOne().select( { highScore: -1, highDate: -1, comment: -1, local: -1 } ).sort( { highScore: -1 } )
+            User.findOne().select( { highScore: -1, highDate: -1, local: -1 } ).sort( { highScore: -1 } )
+            //User.findOne().select( { highScore: -1 } ).sort( { highScore: -1 } )
                 .then( (docs) => {
                     console.log('in /reload: docs = ' + docs + ' logs = ' + logs);
                     //res.render('index', { user : JSON.stringify(docs), logs: JSON.stringify(logs) });  // was req.user

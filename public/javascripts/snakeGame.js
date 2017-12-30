@@ -23,7 +23,7 @@
 // mainplayercount===2 two players signed in
 // S = snake = green = IamGreen=true
 // O = oppoSnake = blue = IamGreen=false
-
+// IamGreen boolean also used to determine which client is the active client
 
 // ------------------------------------------------------------
 // Creating A Snake Game Tutorial With HTML5
@@ -413,7 +413,7 @@
 
     // Variables
     var score = 0;              //
-    var newHighScore = 0;       // new high score within this game, will replace dbHighScore on server if higher
+    var newHighScore = 0;       // new high score within this game, will replace db HighScore on server if higher
     var gameoverS = true;        // Game is over === set to true to stop snake from moving when initialized
     var gameoverO = true;        // Game is over === set to true to stop oppoSnake from moving when initialized
     var roundover = true;      // when player collides with something, the round is over
@@ -421,12 +421,16 @@
     var gameoverdelay = 0.25;    // Waiting time after game over, was 0.5
     var maxlives = 5;        // max number of lives
     var livesLeft = maxlives;  // number of lives
-    var gameLevel = 1;         // number of levels to play, advances after completing TODO rounds
+    var gameLevel = 1;         // number of levels to play, advances after completing
     var sSpeed = 10;           // initial speed, bumped to 15 for level 2
     var openValue = 0;          // snake contained in snake object, collision detection done on that object
     var wallValue = 1;          // grid values in 2 dimension array used for collision detection
     var gAppleValue = 2;
     var bAppleValue = 3;
+    var orangeValue = 4;             // hitting fruit other than apple matching snake color same as hitting wall
+    var lemonValue = 5;
+    var strawberryValue = 6;
+    var pearValue = 7;
     var playerIDs = {};          // player id's of this client and opponent
     var runLoop;                 // animation variable used to turn on/off animation loop
     var mainPlayerCount;           // set in gameSocket.js 1 = first player = green snake, 2 = second = blue
@@ -607,6 +611,7 @@
         oppoSnake.init(saveoppoSnakeID, 5, 2, 1, sSpeed, 4);  //  function(id, x, y, direction, speed, numsegments)
         */
 
+        addFruits();
         roundover = false;
 
     }
@@ -677,6 +682,78 @@
             }
         }
     }
+
+    function addFruits() {
+
+        if (IamGreen) {
+
+            for (var j = 4; j < 8; j++) {
+                var valid = false;
+                while (!valid) {
+                    // Get a random position
+                    var ax = randRange(0, level.columns - 1);
+                    var ay = randRange(0, level.rows - 1);
+
+                    // Make sure the snake doesn't overlap the new apple
+                    var overlap = false;
+                    for (var i = 0; i < snake.segments.length; i++) {
+                        // Get the position of the current snake segment
+                        var sx = snake.segments[i].x;
+                        var sy = snake.segments[i].y;
+
+                        // Check overlap
+                        if (ax === sx && ay === sy) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+
+                    // Tile must be empty
+                    if (!overlap && level.tiles[ax][ay] === openValue) {
+                        // Add an apple at the tile position
+                        level.tiles[ax][ay] = j; // add four other fruit to grid
+                        valid = true;
+                    }
+                }
+            }
+
+        }
+
+        if (!IamGreen) {
+
+            for (var j = 4; j < 8; j++) {
+                var valid = false;
+                while (!valid) {
+                    // Get a random position
+                    var ax = randRange(0, level.columns - 1);
+                    var ay = randRange(0, level.rows - 1);
+
+                    // Make sure the snake doesn't overlap the new apple
+                    var overlap = false;
+                    for (var i = 0; i < oppoSnake.segments.length; i++) {
+                        // Get the position of the current snake segment
+                        var sx = oppoSnake.segments[i].x;
+                        var sy = oppoSnake.segments[i].y;
+
+                        // Check overlap
+                        if (ax === sx && ay === sy) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+
+                    // Tile must be empty
+                    if (!overlap && level.tiles[ax][ay] === openValue) {
+                        // Add an apple at the tile position
+                        level.tiles[ax][ay] = j; // add four other fruit to grid
+                        valid = true;
+                    }
+                }
+            }
+        }
+
+    }
+
 
     // Main loop
     function main(tframe) {
@@ -792,10 +869,15 @@
             var ny = nextmove.y;
 
             if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {  // outer walls
-                if (level.tiles[nx][ny] === wallValue) {
-                    // Collision with a wall
+                if (level.tiles[nx][ny] === wallValue ||
+                    level.tiles[nx][ny] === orangeValue ||
+                    level.tiles[nx][ny] === lemonValue ||
+                    level.tiles[nx][ny] === strawberryValue ||
+                    level.tiles[nx][ny] === pearValue) {
+                    // Collision with a wall or other fruit
                     gameoverS = true;
                     snakeCollideWall(snake.id);
+                    //clearFruits();
                 }
 
                 // sockets add call to server to notify players of collision
@@ -854,6 +936,7 @@
                     if (level.tiles[nx][ny] === gAppleValue) {
                         // Remove the apple
                         level.tiles[nx][ny] = 0;
+                        //clearFruits();
 
                         // Add a new apple
                         addApple();
@@ -940,10 +1023,15 @@
             var ny = nextmove.y;
 
             if (nx >= 0 && nx < level.columns && ny >= 0 && ny < level.rows) {  // outer walls
-                if (level.tiles[nx][ny] === wallValue) {
-                    // Collision with a wall
+                if (level.tiles[nx][ny] === wallValue ||
+                    level.tiles[nx][ny] === orangeValue ||
+                    level.tiles[nx][ny] === lemonValue ||
+                    level.tiles[nx][ny] === strawberryValue ||
+                    level.tiles[nx][ny] === pearValue) {
+                    // Collision with a wall or other fruit
                     gameoverO = true;
-                    oppoSnakeCollideWall(oppoSnake.id);
+                    snakeCollideWall(snake.id);
+                    //clearFruits();
                 }
 
                 // sockets add call to server to notify players of collision
@@ -1002,6 +1090,7 @@
                     if (level.tiles[nx][ny] === bAppleValue) {
                         // Remove the apple
                         level.tiles[nx][ny] = 0;
+                        //clearFruits();
 
                         // Add a new apple
                         addApple();
@@ -1073,6 +1162,20 @@
         }
     }
 
+    function clearFruits() {
+        for (var i = 0; i < level.columns; i++) {
+            for (var j = 0; j < level.rows; j++) {
+                // Get the current tile and location
+                var tile = level.tiles[i][j];              // level.tiles is the grid everything is placed on
+
+                if (tile === orangeValue || tile === lemonValue ||
+                    tile === strawberryValue || tile === pearValue) {
+
+                    level.tiles[i][j] = 0;
+                }
+            }
+        }
+    }
 
 
     function message(msg) {
@@ -1214,7 +1317,7 @@
     function render() {
         // Draw background
         context.fillStyle = "#577ddb";
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, canvas.width, canvas.height); //context.clearRect(0, 0, canvas.width, canvas.height);
 
         drawLevel();
         drawSnake();
@@ -1300,11 +1403,89 @@
             //for (item in data) {
             //    console.log('snakegame item = ' + item + ' data[item] = ' + data[item]);
            // }
-        }).fail(function (xhr) {
+
+
+            // ajax method embedded within successful completion of first ajax update call to database
+            // because we need to wait until the database has a chance to update before proceeding to next
+            // database operation. This is a prime example of the useage of callback logic structure.
+
+            console.log('about to call /reload, username = ' + logs[0].local.username);
+            $.ajax({
+                method: "POST",
+                url: "/reload",
+                data: { username: logs[0].local.username }
+            }).done (function(msg) {
+
+                // all these variable manipulations done here within the ajax method to do the asynchronous delay
+                // in response back from the database. javascript will zoom ahead of the db returning data thus
+                // making the html updates meaningless. putting the html updates here forces the code to update within
+                // the callback.
+                console.log('ajax second success');
+                //console.log('ajax second success' + msg);
+                //for (item in msg) {
+                //    console.log('snakegame msg = ' + item + ' msg[item] = ' + msg[item]);
+                //}
+                passed_user = JSON.parse(msg.user);
+                passed_logs = JSON.parse(msg.logs);  // logs is returned as an object within an array
+                var rv = {};
+                for (var i = 0; i < passed_logs.length; ++i) {
+                    rv[i] = passed_logs[i];
+                }
+
+                /*
+                console.log('');
+                console.log('passed_user = ' + JSON.stringify(passed_user));
+                console.log('passed_logs = ' + JSON.stringify(passed_logs));
+                */
+
+                user.highScore = passed_user.highScore;
+                user.highDate = passed_user.highDate;
+                user.local.username = passed_user.local.username;
+                logs[0].highScore = passed_logs[0].highScore;
+                logs[0].highDate = passed_logs[0].highDate;
+                logs[0].local.username = passed_logs[0].local.username;
+
+                /*
+                console.log('')
+                console.log('passed_logs.highScore = ' + logs[0].highScore);
+                console.log('passed_logs.highDate = ' + logs[0].highDate);
+                console.log('');
+                console.log('user.highScore = ' + user.highScore);
+                console.log('user.highDate = ' + user.highDate);
+                console.log('logs[0].highScore = ' + logs[0].highScore);
+                console.log('logs[0].highDate = ' + logs[0].highDate);
+                */
+
+                if (user.highDate === null || user.highDate === undefined) {
+                    user.highDate = new Date().toDateString();
+                }
+                if (logs[0].highDate === null || logs[0].highDate === undefined) {
+                    logs[0].highDate = new Date().toDateString();
+                }
+
+                $('#highestscore').html(user.highScore);
+                $('#hDate').html(user.highDate.substr(0, 10));
+                $('#hUser').html(user.local.username);
+
+                $('#highestuserscore').html(logs[0].highScore);
+                $('#hdate').html(logs[0].highDate.substr(0, 10));
+                $('#huser').html(logs[0].local.username);
+                $('#huser1').html(logs[0].local.username);
+
+
+            }).fail(function (xhr) {
+                console.log("ajax second Post error:");
+                for (item in xhr) {
+                    console.log(xhr[item]);
+                }
+            });
+
+
+        }).fail(function (xhr,status,error) {                     //error(xhr,status,error)
            console.log("ajax Post error:");
-           for (item in xhr) {
-               console.log(xhr[item]);
-           }
+           console.log('xhr = ' + JSON.stringify(xhr));
+           console.log('status = ' + status);
+           console.log('error = ' + error);
         });
 
         var passed_user = {};
@@ -1312,81 +1493,12 @@
 
         // this ajax method gets the new highest score on the database as well as the player's highest score
 
-        console.log('about to call /reload, username = ' + logs[0].local.username);
-        $.ajax({
-            method: "POST",
-            url: "/reload",
-            data: { username: logs[0].local.username }
-            }).done (function(msg) {
-
-            // all these variable manipulations done here within the ajax method to do the asynchronous delay
-            // in response back from the database. javascript will zoom ahead of the db returning data thus
-            // making the html updates meaningless. putting the html updates here forces the code to update within
-            // the callback.
-            console.log('ajax second success');
-            //console.log('ajax second success' + msg);
-            //for (item in msg) {
-            //    console.log('snakegame msg = ' + item + ' msg[item] = ' + msg[item]);
-            //}
-            passed_user = JSON.parse(msg.user);
-            passed_logs = JSON.parse(msg.logs);  // logs is returned as an object within an array
-            var rv = {};
-            for (var i = 0; i < passed_logs.length; ++i) {
-                rv[i] = passed_logs[i];
-            }
-
-            console.log('');
-            console.log('passed_user = ' + JSON.stringify(passed_user));
-            console.log('passed_logs = ' + JSON.stringify(passed_logs));
-
-
-            user.highScore = passed_user.highScore;
-            user.highDate = passed_user.highDate;
-            user.local.username = passed_user.local.username;
-            logs[0].highScore = passed_logs[0].highScore;
-            logs[0].highDate = passed_logs[0].highDate;
-            logs[0].local.username = passed_logs[0].local.username;
-
-
-            console.log('')
-            console.log('passed_logs.highScore = ' + logs[0].highScore);
-            console.log('passed_logs.highDate = ' + logs[0].highDate);
-            console.log('');
-            console.log('user.highScore = ' + user.highScore);
-            console.log('user.highDate = ' + user.highDate);
-            console.log('logs[0].highScore = ' + logs[0].highScore);
-            console.log('logs[0].highDate = ' + logs[0].highDate);
-
-            if (user.highDate === null || user.highDate === undefined) {
-                user.highDate = new Date().toDateString();
-            }
-            if (logs[0].highDate === null || logs[0].highDate === undefined) {
-                logs[0].highDate = new Date().toDateString();
-            }
-
-
-            $('#highestscore').html(user.highScore);
-            $('#hDate').html(user.highDate.substr(0, 10));
-            $('#hUser').html(user.local.username);
-
-            $('#highestuserscore').html(logs[0].highScore);
-            $('#hdate').html(logs[0].highDate.substr(0, 10));
-            $('#huser').html(logs[0].local.username);
-            $('#huser1').html(logs[0].local.username);
-
-
-        }).fail(function (xhr) {
-            console.log("ajax second Post error:");
-            for (item in xhr) {
-                console.log(xhr[item]);
-            }
-        });
 
         console.log('leaving updateDatabase');
     }
 
 
-    // Draw the level tiles
+    // Draw the level tiles and Fruits
     function drawLevel() {
 
         if (mainPlayerCount === 2) {
@@ -1401,7 +1513,8 @@
             tileimage = imagesG[0];
             drawLevelItems();
         }
-
+        tileimage = imagesG[0];
+        drawLevelFruits();
     }
 
     function drawLevelItems() {
@@ -1449,22 +1562,62 @@
         }
     }
 
+    function drawLevelFruits() {
+
+        for (var i=0; i<level.columns; i++) {
+            for (var j=0; j<level.rows; j++) {
+                // Get the current tile and location
+                var tile = level.tiles[i][j];              // level.tiles is the grid everything is placed on
+                var tilex = i*level.tilewidth;
+                var tiley = j*level.tileheight;
+
+                if (tile === orangeValue || tile === lemonValue ||
+                    tile === strawberryValue || tile === pearValue) {
+
+                    //context.fillStyle = "#f7e697";
+                    context.fillStyle = "#000000";
+                    context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
+
+                    if (tile === orangeValue) {
+                        tx = 1;
+                        ty = 1;
+                        tilew = 64;
+                        tileh = 64;
+                        context.drawImage(tileimage, tx * tilew, ty * tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
+                    } else if (tile === lemonValue) {
+                        tx = 1;
+                        ty = 2;
+                        tilew = 64;
+                        tileh = 64;
+                        context.drawImage(tileimage, tx * tilew, ty * tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
+                    } else if (tile === strawberryValue) {
+                        tx = 1;
+                        ty = 3;
+                        tilew = 64;
+                        tileh = 64;
+                        context.drawImage(tileimage, tx * tilew, ty * tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
+                    } else if (tile === pearValue) {
+                        tx = 2;
+                        ty = 3;
+                        tilew = 64;
+                        tileh = 64;
+                        context.drawImage(tileimage, tx * tilew, ty * tileh, tilew, tileh, tilex, tiley, level.tilewidth, level.tileheight);
+                    }
+                }
+            }
+        }
+    }
+
+
     // Draw the snake
     function drawSnake() {
 
         //console.log('in drawSnake driver function, mainPlayerCount = ' + mainPlayerCount);
         if (mainPlayerCount === 2) {
-            if (IamGreen) {
-                tileimage = imagesG[0];
-                drawSnakeG();
-                tileimage = imagesB[0];
-                drawSnakeB();
-            } else {
-                tileimage = imagesG[0];
-                drawSnakeG(); // was B
-                tileimage = imagesB[0];
-                drawSnakeB(); // was G
-            }
+            tileimage = imagesG[0];
+            drawSnakeG();
+            tileimage = imagesB[0];
+            drawSnakeB();
         } else {
             tileimage = imagesG[0];
             drawSnakeG();
