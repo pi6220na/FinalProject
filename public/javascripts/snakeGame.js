@@ -1396,14 +1396,14 @@
             method: "POST",
             url: "/update",
             //data: { _id: logs[0]._id, highScore: HighScore, highDate: Date.now() }
-            data: { _id: logs[0]._id, highScore: HighScore, highDate: new Date() }
+            data: { _id: logs[0]._id, highScore: HighScore, highDate: new Date() },
         }).done (function(msg) {
             console.log('ajax success');
+
             //console.log('ajax success' + msg);
             //for (item in data) {
             //    console.log('snakegame item = ' + item + ' data[item] = ' + data[item]);
            // }
-
 
             // ajax method embedded within successful completion of first ajax update call to database
             // because we need to wait until the database has a chance to update before proceeding to next
@@ -1472,16 +1472,14 @@
                 $('#huser').html(logs[0].local.username);
                 $('#huser1').html(logs[0].local.username);
 
-
-            }).fail(function (xhr) {
-                console.log("ajax second Post error:");
-                for (item in xhr) {
-                    console.log(xhr[item]);
-                }
+            }).fail(function (xhr,status,error) {
+                console.log("ajax Second Post error:");
+                console.log('xhr = ' + JSON.stringify(xhr));
+                console.log('status = ' + status);
+                console.log('error = ' + error);
             });
 
-
-        }).fail(function (xhr,status,error) {                     //error(xhr,status,error)
+        }).fail(function (xhr,status,error) {
            console.log("ajax Post error:");
            console.log('xhr = ' + JSON.stringify(xhr));
            console.log('status = ' + status);
@@ -1530,12 +1528,14 @@
                 if (tile === openValue) {
                     // Empty space
                     //context.fillStyle = "#f7e697";
-                    context.fillStyle = "#000000";
+                    //context.fillStyle = "#000000";
+                    context.fillStyle = "#060B3A";
                     context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
                 } else if (tile === wallValue) {
                     // Wall
                     //context.fillStyle = "#bcae76";
-                    context.fillStyle = "#000000";
+                    //context.fillStyle = "#000000";
+                    context.fillStyle = "#060B3A";
                     context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
                     var tx = 0;
                     var ty = 2;
@@ -1548,7 +1548,8 @@
 
                     // Draw apple background
                     //context.fillStyle = "#f7e697";
-                    context.fillStyle = "#000000";
+                    //context.fillStyle = "#000000";
+                    context.fillStyle = "#060B3A";
                     context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
 
                     // Draw the apple image
@@ -1575,7 +1576,8 @@
                     tile === strawberryValue || tile === pearValue) {
 
                     //context.fillStyle = "#f7e697";
-                    context.fillStyle = "#000000";
+                    //context.fillStyle = "#000000";
+                    context.fillStyle = "#060B3A";
                     context.fillRect(tilex, tiley, level.tilewidth, level.tileheight);
 
                     if (tile === orangeValue) {
