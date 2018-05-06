@@ -232,7 +232,8 @@ function init(io) {
             socket.emit('ping', { beat : 1 });
         }
 
-        setTimeout(sendHeartbeat, 8000);
+
+        Timeout(sendHeartbeat, 8000);
 */
 
     })
